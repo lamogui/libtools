@@ -1,0 +1,14 @@
+
+#objects
+*.o
+*.obj
+*.a
+*.lib
+
+build/
+build_gcc/
+build_vs11/
+
+
+
+
