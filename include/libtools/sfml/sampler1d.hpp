@@ -21,31 +21,48 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * VISIBILITY     : PROTECTED
   * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
   *
-  * FILE         : glslrender.hpp
+  * FILE         : sampler1d.hpp
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
   * VERSION      : V2.0 olol
   * DEPENDENCIES : config.h
   */
 
-#ifndef LIBTOOLS_SFMLGLSLRENDER_HPP
-#define LIBTOOLS_SFMLGLSLRENDER_HPP
-
-#include <libtools/public/config.h>
-#include <SFML/Graphics.hpp>
-#include <string>
-
-class LIBTOOLS_PRIVATE GLSLRender : public sf::Drawable, public sf::Transformable, public sf::Shader
-{
-  public:
-    GLSLRender();
-    virtual ~GLSLRender();
-    
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-    static std::string getVertexShaderCode();
-    
-  protected:
-    sf::RectangleShape _rectangle;
+  #ifndef LIBTOOLS_SFMLSAMPLER1D_HPP
+  #define LIBTOOLS_SFMLSAMPLER1D_HPP
   
-};
-
-#endif
+  #include <libtools/public/config.h>
+  
+  class Sampler1D : public sf::GlTexture
+  {
+    public:
+      Sampler1D();
+      virtual ~Sampler1D();
+      bool create(unsigned int size, const float*);
+      void update(const float* );
+      void update(const float* , unsigned int size, unsigned int x=0);
+      
+      virtual void bind() const;
+      
+      inline unsigned int getSize() const {
+        return _size;
+      }
+      
+      inline bool isSmooth() const {
+        return _smooth;
+      }
+      
+      inline bool isRepeated() const {
+        return _isRepeated;
+      }
+      
+    private:
+      unsigned int _realSize;
+      unsigned int _size;
+      
+      bool _smooth;
+      bool _isRepeated;
+      
+  };
+  
+  
+  #endif
