@@ -1,3 +1,5 @@
+
+
 /*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE666 COPYDOWN. 
@@ -21,36 +23,28 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * VISIBILITY     : PRIVATE
   * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
   *
-  * FILE         : glslrender.cpp
+  * FILE         : vertex.c
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
-  * VERSION      : V2.0 olol
-  * DEPENDENCIES : glslrender.hpp
-  *                shader.h
+  * VERSION      : V1.0 olol
+  * DEPENDENCIES : config.h
+  * ROLE         : Vertex shaders
   */
 
-#include <libtools/sfml/glslrender.hpp>
-#include <libtools/shaders/shaders.h>
+#include <libtools/public/config.h>
 
-GLSLRender::GLSLRender():
-_rectangle(sf::Vector2f(1.f,1.f))
-{
-  _rectangle.setOrigin(sf::Vector2f(.5f,.5f));
+#ifdef __cplusplus
+extern "C" {
+#endif 
+
+const char* v_vs_src=
+"varying vec2 v;"
+"void main()"
+"{"
+    "gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;"
+    "v           = gl_Vertex.xy;"
+    "gl_TexCoord[0] = gl_MultiTexCoord0;"
+"}";
+
+#ifdef __cplusplus
 }
-
-GLSLRender::~GLSLRender()
-{
-}
-    
-void GLSLRender::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{
-  states.transform *= getTransform();
-  sf::Shader::bind(this);
-  target.draw(_rectangle,states);
-  sf::Shader::bind(NULL);
-}
-
-
-std::string GLSLRender::getVertexShaderCode() {
-  return v_vs_src;
-}
-
+#endif

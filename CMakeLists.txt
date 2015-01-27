@@ -38,6 +38,8 @@ file(GLOB src_core "src/core/*")
 file(GLOB src_public "src/public/*")
 #src_drivers
 file (GLOB src_drivers "src/drivers/*")
+#src_shaders
+file (GLOB src_shaders "src/shaders/*")
 #h
 #h_sfml
 file(GLOB h_sfml "include/libtools/sfml/*")
@@ -47,14 +49,16 @@ file(GLOB h_core "include/libtools/core/*")
 file(GLOB h_public "include/libtools/public/*")
 #h_drivers
 file (GLOB h_drivers "include/libtools/drivers/*")
-#all includes
+#h_drivers
 file (GLOB h_drivers "include/libtools/drivers/*")
+#all includes
+file (GLOB h_shaders "include/libtools/shaders/*")
 #src groups
 source_group("core" FILES  ${src_core} ${h_core})
 source_group("drivers" FILES  ${src_drivers} ${h_drivers})
 source_group("sfml" FILES  ${src_sfml} ${h_sfml})
 source_group("public" FILES  ${src_public} ${h_public})
-
+source_group("shaders" FILES  ${src_shaders} ${h_shaders})
 
 MESSAGE( STATUS "Install location: " ${CMAKE_INSTALL_PREFIX} )
 
@@ -70,6 +74,8 @@ if (BUILD_SFML2_IMPLEMENTATION)
     ${h_public}
     ${src_sfml}
     ${h_sfml}
+    ${src_shaders}
+    ${h_shaders}
   )
   target_compile_options( tools-sfml PRIVATE "-DBUILD_LIBTOOLS_SFML")
   set_target_properties( tools-sfml PROPERTIES LIBRARY_OUTPUT_NAME_DEBUG tools-sfml-d)
@@ -95,6 +101,8 @@ if (BUILD_STL_2011_IMPLEMENTATION)
     ${h_drivers}
     ${src_public}
     ${h_public}
+    ${src_shaders}
+    ${h_shaders}
   )
   target_compile_options( tools-c++11 PRIVATE "-std=c++11")
   set_target_properties(tools-c++11 PROPERTIES LIBRARY_OUTPUT_NAME_DEBUG tools-c++11-d)

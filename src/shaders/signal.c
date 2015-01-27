@@ -19,7 +19,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 /**
   * THIS FILE IS PART OF LIBTOOLS 
   * SECURITY LEVEL : 8 (CRITICAL)  
-  * VISIBILITY     : PROTECTED
+  * VISIBILITY     : PRIVATE
   * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
   *
   * FILE         : signal.c
@@ -36,26 +36,46 @@ extern "C" {
 #endif 
 
 
-const char* lightsaber_signal_fs =
+const char* lightsaber_signal_fs_src =
 "varying vec2 v;"
-  "uniform sampler1D signal;"
-  "uniform float thickness;"
-  "uniform bool reversed;"
-  "uniform vec4 color;"
-  "void main() {"
-    "float vs;"
-    "if (reversed)"
-      "vs=texture1D(signal, 1.f-v.x);"
-    "else "
-      "vs=texture1D(signal, v.x);"
-    "const float eps=vs-v.y;"
-    "const float thick=thickness*0.5f;"
-    "if (eps > -thick && eps < thick)"
-      "gl_FragColor = mix(vec4(1.f,1.f,1.f,1.f),color,pow(abs(eps/thick),1.5f));"
-    "else "
-      "gl_FragColor = vec4(0.f,0.f,0.f,0.f);"
-  "}";
+"uniform sampler1D signal;"
+"uniform float thickness;"
+"uniform bool reversed;"
+"uniform vec4 color;"
+"void main() {"
+  "float vs;"
+  "if (reversed)"
+    "vs=texture1D(signal, 1.0-v.x);"
+  "else "
+    "vs=texture1D(signal, v.x);"
+  "const float eps=vs-v.y;"
+  "const float thick=thickness*0.5;"
+  "if (eps > -thick && eps < thick)"
+    "gl_FragColor = mix(vec4(1.0,1.0,1.0,1.0),color,pow(abs(eps/thick),1.5));"
+  "else "
+    "gl_FragColor = vec4(0.0,0.0,0.0,0.0);"
+"}";
   
+const char* classic_signal_fs_src=
+"varying vec2 v;"
+"uniform sampler1D signal;"
+"uniform float thickness;"
+"uniform bool reversed;"
+"uniform vec4 color;"
+"void main() {"
+  "float vs;"
+  "if (reversed)"
+    "vs=texture1D(signal, 1.0-v.x);"
+  "else "
+    "vs=texture1D(signal, v.x);"
+  "const float eps=vs-v.y;"
+  "const float thick=thickness*0.5;"
+  "if (eps > -thick && eps < thick)"
+    "gl_FragColor = vec4(color.rgb, color.a*(1.0-pow(abs(eps/thick),1.5)));"
+  "else "
+    "gl_FragColor = vec4(0.,0.,0.0,0.0);"
+"}";
+
 #ifdef __cplusplus
 }
 #endif

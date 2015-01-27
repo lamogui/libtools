@@ -35,8 +35,12 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 extern "C" {
 #endif 
  
-extern const char* lightsaber_signal_fs;
-extern const char* classic_signal_fs;
+//Signal
+extern const char* lightsaber_signal_fs_src;
+extern const char* classic_signal_fs_src;
+
+//Vertex
+extern const char* v_vs_src;
 
 #ifdef __cplusplus
 }
