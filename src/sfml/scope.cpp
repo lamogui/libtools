@@ -39,34 +39,7 @@ AND RENUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #ifdef _MSC_VER
 #pragma warning( disable : 4244 )
 #endif
-/*
-ScopeA::ScopeA(const sf::Vector2f& size,const sf::Font& font, bool spectrum) :
-  Interface(sf::Vector2u(Signal::size,100),size),
-  _signal(0),
-  _fft(0),
-  _pixels(0),
-  _color(255,255,255,255),
-  _texture(),
-  _back(sf::Vector2f(Signal::size,100)),
-  _sprite(),
-  _y_zoom(1),
-  _update_time(0),
-  _time(0),
-  _spectrum(spectrum),
-  _autoscaley(0),
-  _modeButton(sf::Vector2f(80.f,18.f), "FFT" ,font),
-  _autoYScaleButton(sf::Vector2f(80.f,18.f), "Auto Scale",font )
-{
-  _back.setFillColor(sf::Color(42,42,42,128));
-  _modeButton.setCallback(this,&ScopeA::setSpectrum, &ScopeA::isSpectrum);
-  _autoYScaleButton.linkTo(&_autoscaley);
-  addMouseCatcher(&_modeButton);
-  addMouseCatcher(&_autoYScaleButton);
-  addDrawable(&_sprite);
-  addDrawable(&_back);
-  _allocate();
-}
-*/
+
 
 ScopeA::ScopeA(const sf::Vector2f& size,const sf::Font& font, bool spectrum, Signal* s) :
   Interface(sf::Vector2u(Signal::size,100),size),
@@ -123,7 +96,7 @@ void ScopeA::_allocate()
       const unsigned samples = GetSettingsFor("FFT/Samples",4096);
       const unsigned size=samples < 4096 ? samples: 4096;
       _fft=new FFT(samples); 
-      _internalZoneChanged(sf::Vector2u(size,_zone.y));
+      _internalZoneChanged(sf::Vector2u(size>>1,_zone.y));
     }
     else {
       _internalZoneChanged(sf::Vector2u(Signal::size,_zone.y));

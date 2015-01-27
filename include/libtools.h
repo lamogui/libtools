@@ -80,6 +80,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 //sfml (graphical tools) not available on public dll
 #if defined(SFML_GRAPHICS_HPP) && !defined(LIBTOOLS_DLL)
+#include <libtools/sfml/glslrender.hpp>
 #include <libtools/sfml/interface.hpp>
 #include <libtools/sfml/window.hpp>
 #include <libtools/sfml/debug.hpp>

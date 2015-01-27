@@ -36,6 +36,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 FFT::FFT(unsigned int size) :
   _input(NULL),
+  _window(NULL),
   _real(NULL),
   _imaginary(NULL),
   _module(NULL),
@@ -127,6 +128,7 @@ void FFT::realloc(unsigned int size) {
     std::cout << "FFT configuration : " << _size << " samples (2^" << _pow2 << ")" << std::endl;
     _inputOffset=0;
     _input=(sample*)std::realloc((void*)_input,_size*sizeof(float));
+    _window=(sample*)std::realloc((void*)_window,_size*sizeof(float));
     _real=(sample*)std::realloc((void*)_real,_size*sizeof(float));
     _imaginary=(sample*)std::realloc((void*)_imaginary,_size*sizeof(float));
     _module=(sample*)std::realloc((void*)_module,_size*sizeof(float));
@@ -150,6 +152,10 @@ void FFT::realloc(unsigned int size) {
     _imaginary[i]=0;
     _module[i]=0;
     _input[i]=0;
+    //Hann
+    //_window[i]=0.5f - 0.5f*cos(2.f*3.14159265359f*((sample)i/(sample)_size));
+    //Blackman
+    _window[i]=0.42f - 0.5f*cos(2.f*3.14159265359f*((sample)i/(sample)_size))+ 0.08f*cos(4.f*3.14159265359f*((sample)i/(sample)_size));
   }
   
   //calcul des twidleFactor
@@ -215,17 +221,14 @@ void FFT::compute(const Signal &s) {
   compute(s.samples, Signal::size);
 }
 
-//#include <QDebug>
 
 void FFT::compute(const sample* s, unsigned int size) {
   if (size > _size) size = _size;
   unsigned int k=0;
   //Copy AND swap (no need to SWAP for imaginary (always 0))
-  for (; k<size; k++) {_real[_indexTable[k]]=s[k]; _imaginary[k]=0;}
+  for (; k<size; k++) {_real[_indexTable[k]]=s[k]*_window[k]; _imaginary[k]=0;}
   //zero-padding
   for (; k<_size; k++) {_real[_indexTable[k]]=0; _imaginary[k]=0;}
-
-  //qDebug() << "Input fft " << size << " FFT Size " << _size;
 
   //butterfly
   unsigned int N_sum=0;

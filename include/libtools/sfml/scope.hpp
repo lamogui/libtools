@@ -39,6 +39,7 @@ AND RENUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #define LIBTOOLS_SCOPE_HPP
 
 #include <cstdlib>
+#include <SFML/Graphics.hpp>
 #include <libtools/public/config.h>
 #include <libtools/core/signal.hpp>
 #include <libtools/core/visualsignal.hpp>
@@ -89,6 +90,7 @@ class ScopeA : public Interface
       ModulableCallbackButton<ScopeA> _modeButton;
       Button _autoYScaleButton;
 };
+
 
 class VisualSignalInterface : public Interface
 {

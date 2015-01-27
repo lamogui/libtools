@@ -88,6 +88,7 @@ class LIBTOOLS_PRIVATE FFT
 #endif   
   private:
     sample* _input; //Real input buffer;
+    sample* _window;
     sample* _real;
     sample* _imaginary;
     sample* _module;
