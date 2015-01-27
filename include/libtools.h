@@ -102,6 +102,9 @@ extern "C" {
 //drivers
 #include <libtools/drivers/bassproc.h>
 
+//shaders
+#include <libtools/shaders/shaders.h>
+
 #ifdef __cplusplus
 }
 #endif
