@@ -145,7 +145,7 @@ class NEWindow : public sf::RenderWindow
 
   public:
     //Files dropped
-    std::queue<std::string> filesDropped;
+    std::queue<string_t> filesDropped;
 
 #ifdef LIBTOOLS_WINDOWS
     static bool hasUnicodeSupport();

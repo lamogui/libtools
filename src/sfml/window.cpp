@@ -452,14 +452,14 @@ LRESULT CALLBACK NEWindow::lamoguiWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPAR
 	{
     //MessageBoxA(0,"Drop receive","debug",MB_OK);
 		HDROP hDropInfo = (HDROP) wParam;
-		const unsigned int files = DragQueryFileA(hDropInfo,0xFFFFFFFF,0,0);
+		const unsigned int files = DragQueryFileW(hDropInfo,0xFFFFFFFF,0,0);
 		if (files)
 		{
 			for (unsigned int i=0; i < files; i++)
 		  {
-			  char filename[MAX_PATH];
-			  DragQueryFileA(hDropInfo,i,filename,MAX_PATH);
-        std::string s = filename;
+			  WCHAR filename[MAX_PATH];
+			  DragQueryFileW(hDropInfo,i,filename,MAX_PATH);
+        string_t s = filename;
 			  win->filesDropped.push(s);
 		  }
       return TRUE;
@@ -471,7 +471,7 @@ LRESULT CALLBACK NEWindow::lamoguiWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPAR
      
       COPYDATASTRUCT* cds = (COPYDATASTRUCT*) lParam;
       char* c= (char*)cds->lpData;
-      std::string current;
+      string_t current;
       unsigned int i=0;
       while (*c && i < cds->cbData) {
         if (*c == ';')
