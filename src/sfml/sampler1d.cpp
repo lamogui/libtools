@@ -122,3 +122,37 @@ void Sampler1D::bind() const
     glCheck(glMatrixMode(GL_MODELVIEW));
   }
 }
+
+void Sampler1D::setSmooth(bool smooth)
+{
+  if (smooth != _smooth)
+  {
+      _smooth = smooth;
+
+      if (m_texture)
+      {
+          ensureGlContext();
+
+          glCheck(glBindTexture(GL_TEXTURE_1D, m_texture));
+          glCheck(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, _smooth ? GL_LINEAR : GL_NEAREST));
+          glCheck(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, _smooth ? GL_LINEAR : GL_NEAREST));
+      }
+  }
+}
+
+void Sampler1D::setRepeated(bool repeated)
+{
+  if (repeated != _isRepeated)
+  {
+      _isRepeated = repeated;
+
+      if (m_texture)
+      {
+          ensureGlContext();
+
+          glCheck(glBindTexture(GL_TEXTURE_1D, m_texture));
+          glCheck(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, _isRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
+          glCheck(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, _isRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
+      }
+  }
+}

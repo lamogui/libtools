@@ -211,6 +211,15 @@ sample Signal::level(){
   return lvl;
 }
 
+void Signal::glslize(){
+  const unsigned int size = Signal::size;
+  for (unsigned int k=0; k < size;k++)
+  {
+    samples[k]=(samples[k]*0.5f) + 0.5f;
+  }
+}
+
+
 void Signal::normalize() {
   scale(1.f/(level()+0.001f));
 }

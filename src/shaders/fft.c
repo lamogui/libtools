@@ -1,3 +1,4 @@
+
 /*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE666 COPYDOWN. 
@@ -18,35 +19,44 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 /**
   * THIS FILE IS PART OF LIBTOOLS 
   * SECURITY LEVEL : 8 (CRITICAL)  
-  * VISIBILITY     : PROTECTED
+  * VISIBILITY     : PRIVATE
   * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
   *
-  * FILE         : shaders.h
+  * FILE         : fft.c
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
   * VERSION      : V1.0 olol
   * DEPENDENCIES : config.h
-  * ROLE         : Quelques shaders
+  * ROLE         : Shaders utilisables avec une fft
   */
-  
-#ifndef LIBTOOLS_SHADERS_H
-#define LIBTOOLS_SHADERS_H
+
+#include <libtools/public/config.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif 
- 
-//Signal
-extern const char* lightsaber_signal_fs_src;
-extern const char* classic_signal_fs_src;
 
-//FFT
-extern const char* vls_fft_fs_src;
-
-//Vertex
-extern const char* v_vs_src;
+const char* vls_fft_fs_src=
+"varying vec2 v;"
+"uniform float basslimit;"
+"uniform sampler1D spectrum;"
+"uniform bool yflip;"
+"void main()"
+"{"
+  "vec2 mv=v;"  // ->  [0 1]
+  "if (yflip) mv.y=1.0-mv.y;"
+  "float coord = mv.x*0.19;" // -> 22100 Hz to 4200Hz
+  //Attention normalisé pour pour FFT entre 0 et 1.0 SANS symétrie
+  "float texturev=sqrt(texture1D(spectrum, coord));"
+  "if(texturev >= mv.y ) {"
+      "if (coord < basslimit)"
+          "gl_FragColor = vec4(0.7+0.3*mv.y,(1.-mv.y)*.75,0.3,1.);"
+      "else "
+          "gl_FragColor = vec4(mv.y,(1.-mv.y)*.75,(1.-mv.y)*.1,1.);"
+  "}"
+  "else "
+      "gl_FragColor = vec4(1.0,1.0,1.0,0.0);"
+"}";
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

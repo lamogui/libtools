@@ -52,6 +52,7 @@ BASS_CHANNELGETPOSITION_PROC* BASS_ChannelGetPosition=0;
 BASS_CHANNELGETLENGTH_PROC* BASS_ChannelGetLength=0;
 BASS_CHANNELBYTES2SECONDS_PROC* BASS_ChannelBytes2Seconds=0;
 BASS_CHANNELSECONDS2BYTES_PROC* BASS_ChannelSeconds2Bytes=0;
+BASS_CHANNELGETTAGS_PROC* BASS_ChannelGetTags=0;
 
 
 static HMODULE bass_dll=0;
@@ -77,6 +78,7 @@ int load_bass_procs(const char* bassdllname)
   if (BASS_ChannelGetLength=(BASS_CHANNELGETLENGTH_PROC*)GetProcAddress(bass_dll,"BASS_ChannelGetLength")) loaded++;
   if (BASS_ChannelBytes2Seconds=(BASS_CHANNELBYTES2SECONDS_PROC*)GetProcAddress(bass_dll,"BASS_ChannelBytes2Seconds")) loaded++;
   if (BASS_ChannelSeconds2Bytes=(BASS_CHANNELSECONDS2BYTES_PROC*)GetProcAddress(bass_dll,"BASS_ChannelSeconds2Bytes")) loaded++;
+  if (BASS_ChannelGetTags=(BASS_CHANNELGETTAGS_PROC*)GetProcAddress(bass_dll,"BASS_ChannelGetTags")) loaded++;
   return loaded;
 }
 

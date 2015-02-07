@@ -66,6 +66,9 @@ class LIBTOOLS_PRIVATE Signal
     sample level();
     void normalize(sample coeff);
     void normalize();
+    
+    //Assume signal is normalized
+    void glslize();
 
     void tfd(Signal& out_tfd);
     
@@ -122,14 +125,14 @@ class LIBTOOLS_PRIVATE AbstractSignalSource
 {
   public:
     virtual ~AbstractSignalSource() {}
-    virtual void fetch(Signal* out) = 0;
+    virtual void fetch(Signal& out) = 0;
 };
 
 class LIBTOOLS_PRIVATE AbstractStereoSignalSource
 {
   public:
     virtual ~AbstractStereoSignalSource() {}
-    virtual void fetch(Signal* outleft, Signal* outright) = 0;
+    virtual unsigned int fetch(Signal& outleft, Signal& outright) = 0;
 };
 
 

@@ -43,14 +43,14 @@ FFT::FFT(unsigned int size) :
   _indexTable(NULL),
   _twidleFactor(NULL),
   _twidleFactorI(NULL),
-#if defined(SFML_GRAPHICS_HPP) 
+/*#if defined(SFML_GRAPHICS_HPP) 
   _pixels(NULL),
-#endif
+#endif*/
   _size(0),
   _inputOffset(0),
-#if defined(SFML_GRAPHICS_HPP) 
+/*#if defined(SFML_GRAPHICS_HPP) 
   _texOffset(0),
-#endif
+#endif*/
   _pow2(0)
 {
   this->realloc(size);
@@ -132,9 +132,9 @@ void FFT::realloc(unsigned int size) {
     _real=(sample*)std::realloc((void*)_real,_size*sizeof(float));
     _imaginary=(sample*)std::realloc((void*)_imaginary,_size*sizeof(float));
     _module=(sample*)std::realloc((void*)_module,_size*sizeof(float));
-    #if defined(SFML_GRAPHICS_HPP) 
+    /*#if defined(SFML_GRAPHICS_HPP) 
       _pixels=(uint8_t*)std::realloc((void*)_pixels,2*_size*sizeof(unsigned char));
-    #endif
+    #endif*/
     //le nombre de twidleFator sera toujours de : nbre de points du signal -1
     //les twidleFactor sont aussi des complexes donc il nous faut allouer 2 tableaux
     //dans notre exemple deux tableaux de la taille 15 c'est a dire : [0, 14]
@@ -207,13 +207,13 @@ void FFT::realloc(unsigned int size) {
       //std::cout << "l'index vaut "<<index << std::endl;
       _indexTable[j]=index;
     }
-#if defined(SFML_GRAPHICS_HPP) 
+/*#if defined(SFML_GRAPHICS_HPP) 
   for (unsigned int i=0; i<_size>>1; i++) {
     _pixels[i*4 + 3]=255;
   }
   texture.create(_size>>1, _size>>1);
   texture.setRepeated(true);
-#endif
+#endif*/
 }
 
 
@@ -263,19 +263,22 @@ void FFT::computeModule() {
   if (_real && _imaginary) {
     //static float maxi=0;
     for (unsigned int i=0; i<_size>>1; i++) {
+      //From wikipedia http://en.wikipedia.org/wiki/Discrete_Fourier_transform
+      //x2 pour la symétrie
       _module[i]=(sample)2.0*sqrt((_real[i]*_real[i] + _imaginary[i]*_imaginary[i]))/(float)_size;
-#if defined(SFML_GRAPHICS_HPP)     
+      
+/*#if defined(SFML_GRAPHICS_HPP)     
       _pixels[i*4]=(uint8_t)(_module[i]*255);
       _pixels[i*4 + 1]=(uint8_t)(_module[i]*255);
       _pixels[i*4 + 1]=(uint8_t)(_module[i]*255);
-#endif
+#endif*/
     }
     //maxi=std::max(maxi,*(std::max_element(_module, _module+_size)));
     //std::cout << maxi << std::endl;
-#if defined(SFML_GRAPHICS_HPP)  
+/*#if defined(SFML_GRAPHICS_HPP)  
     texture.update(_pixels,_size>>1,1,0,_texOffset++);
     _texOffset%=_size>>1;
-#endif
+#endif*/
   }
 }
 

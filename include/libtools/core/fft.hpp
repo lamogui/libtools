@@ -37,6 +37,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/public/config.h>
 #include <libtools/core/signal.hpp>
 
+/*#if defined(SFML_GRAPHICS_HPP)   
+#include <libtools/sfml/sampler1d.hpp>
+#endif*/
 
 class LIBTOOLS_PRIVATE FFT
 {
@@ -82,10 +85,10 @@ class LIBTOOLS_PRIVATE FFT
     
     
     float bass();
-#if defined(SFML_GRAPHICS_HPP)     
+/*#if defined(SFML_GRAPHICS_HPP)     
     sf::Texture texture;
     inline unsigned int getTextureOffset() { return _texOffset;}
-#endif   
+#endif */  
   private:
     sample* _input; //Real input buffer;
     sample* _window;
@@ -95,14 +98,14 @@ class LIBTOOLS_PRIVATE FFT
     unsigned int* _indexTable;
     sample* _twidleFactor;
     sample* _twidleFactorI;
-#if defined(SFML_GRAPHICS_HPP) 
-    uint8_t* _pixels;
-#endif
+/*#if defined(SFML_GRAPHICS_HPP) 
+    Sampler1D _texture;
+#endif*/
     unsigned int _size;
     unsigned int _inputOffset;
-#if defined(SFML_GRAPHICS_HPP) 
+/*#if defined(SFML_GRAPHICS_HPP) 
     unsigned int _texOffset;
-#endif
+#endif*/
     unsigned short _pow2;
 
 

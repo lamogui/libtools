@@ -110,6 +110,16 @@ typedef struct {
 
 typedef unsigned __int64 QWORD;
 
+typedef struct {
+    char id[3];
+    char title[30];
+    char artist[30];
+    char album[30];
+    char year[4];
+    char comment[30];
+    BYTE genre;
+} TAG_ID3;
+
 #define BASS_SAMPLE_8BITS		1	// 8 bit
 #define BASS_SAMPLE_FLOAT		256	// 32-bit floating-point
 #define BASS_SAMPLE_MONO		2	// mono
@@ -170,6 +180,30 @@ typedef unsigned __int64 QWORD;
 #define BASS_POS_DECODE			0x10000000 // flag: get the decoding (not playing) position
 #define BASS_POS_DECODETO		0x20000000 // flag: decode to the position instead of seeking
 
+// BASS_ChannelGetTags types : what's returned
+#define BASS_TAG_ID3		0	// ID3v1 tags : TAG_ID3 structure
+#define BASS_TAG_ID3V2		1	// ID3v2 tags : variable length block
+#define BASS_TAG_OGG		2	// OGG comments : series of null-terminated UTF-8 strings
+#define BASS_TAG_HTTP		3	// HTTP headers : series of null-terminated ANSI strings
+#define BASS_TAG_ICY		4	// ICY headers : series of null-terminated ANSI strings
+#define BASS_TAG_META		5	// ICY metadata : ANSI string
+#define BASS_TAG_APE		6	// APE tags : series of null-terminated UTF-8 strings
+#define BASS_TAG_MP4 		7	// MP4/iTunes metadata : series of null-terminated UTF-8 strings
+#define BASS_TAG_VENDOR		9	// OGG encoder : UTF-8 string
+#define BASS_TAG_LYRICS3	10	// Lyric3v2 tag : ASCII string
+#define BASS_TAG_CA_CODEC	11	// CoreAudio codec info : TAG_CA_CODEC structure
+#define BASS_TAG_MF			13	// Media Foundation tags : series of null-terminated UTF-8 strings
+#define BASS_TAG_WAVEFORMAT	14	// WAVE format : WAVEFORMATEEX structure
+#define BASS_TAG_RIFF_INFO	0x100 // RIFF "INFO" tags : series of null-terminated ANSI strings
+#define BASS_TAG_RIFF_BEXT	0x101 // RIFF/BWF "bext" tags : TAG_BEXT structure
+#define BASS_TAG_RIFF_CART	0x102 // RIFF/BWF "cart" tags : TAG_CART structure
+#define BASS_TAG_RIFF_DISP	0x103 // RIFF "DISP" text tag : ANSI string
+#define BASS_TAG_APE_BINARY	0x1000	// + index #, binary APE tag : TAG_APE_BINARY structure
+#define BASS_TAG_MUSIC_NAME		0x10000	// MOD music name : ANSI string
+#define BASS_TAG_MUSIC_MESSAGE	0x10001	// MOD message : ANSI string
+#define BASS_TAG_MUSIC_ORDERS	0x10002	// MOD order list : BYTE array of pattern numbers
+#define BASS_TAG_MUSIC_INST		0x10100	// + instrument #, MOD instrument name : ANSI string
+#define BASS_TAG_MUSIC_SAMPLE	0x10300	// + sample #, MOD sample name : ANSI string
 
 //Others
 #define BASS_ASYNCFILE			0x40000000
@@ -211,7 +245,7 @@ typedef QWORD BASSDEF (BASS_CHANNELGETLENGTH_PROC)(DWORD handle, DWORD mode);
 typedef double BASSDEF (BASS_CHANNELBYTES2SECONDS_PROC)(DWORD handle, QWORD pos);
 typedef QWORD BASSDEF (BASS_CHANNELSECONDS2BYTES_PROC)(DWORD handle, double pos);
 
-
+typedef const char* BASSDEF(BASS_CHANNELGETTAGS_PROC)(DWORD handle, DWORD tags);
 
 //extern
 #ifndef BASSPROC_IMPLEMENT
@@ -230,6 +264,7 @@ extern BASS_CHANNELGETPOSITION_PROC* BASS_ChannelGetPosition;
 extern BASS_CHANNELGETLENGTH_PROC* BASS_ChannelGetLength;
 extern BASS_CHANNELBYTES2SECONDS_PROC* BASS_ChannelBytes2Seconds;
 extern BASS_CHANNELSECONDS2BYTES_PROC* BASS_ChannelSeconds2Bytes;
+extern BASS_CHANNELGETTAGS_PROC* BASS_ChannelGetTags;
 #endif
 
 ///BASSFLAC PROCS

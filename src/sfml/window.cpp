@@ -350,34 +350,67 @@ void NEWindow::arrange() {
   for (unsigned int k=0;k<_interfaces.size();k++)
     idealSize+=_interfaces[k]->getIdealSize();
   
-  if (_clientSize.y >= idealSize.y) //Plus de place que necessaire
-  {
-    float y1=0;
-    for (unsigned int i=0;i<_interfaces.size();i++)
+  if (0) { //Cas zoom automatique
+    if (_clientSize.y >= idealSize.y) //Plus de place que necessaire
     {
-      float sfac=_clientSize.y/(float)idealSize.y;
-      _interfaces[i]->setViewSize(_clientSize.x/sfac,_interfaces[i]->getIdealSize().y);
-      float y2 = sfac*_interfaces[i]->getIdealSize().y/(float)_clientSize.y;
-      _interfaces[i]->setViewport(sf::FloatRect(_viewportMin.x,
-                                      _viewportMin.y+y1*_viewportMax.y,
-                                      _viewportMax.x,
-                                      y2*_viewportMax.y));
-      y1+=y2;
+      float y1=0;
+      for (unsigned int i=0;i<_interfaces.size();i++)
+      {
+        float sfac=_clientSize.y/(float)idealSize.y;
+        _interfaces[i]->setViewSize(_clientSize.x/sfac,_interfaces[i]->getIdealSize().y);
+        float y2 = sfac*_interfaces[i]->getIdealSize().y/(float)_clientSize.y;
+        _interfaces[i]->setViewport(sf::FloatRect(_viewportMin.x,
+                                        _viewportMin.y+y1*_viewportMax.y,
+                                        _viewportMax.x,
+                                        y2*_viewportMax.y));
+        y1+=y2;
+      }
     }
-  }
-  else //on alloue proportionellement à la place dispo
-  {
-    float y1=0;
-    for (unsigned int i=0;i<_interfaces.size();i++)
+    else //on alloue proportionellement à la place dispo
     {
-      _interfaces[i]->setViewSize(_clientSize.x,
-                                  _interfaces[i]->getIdealSize().y*_clientSize.y/(float)idealSize.y);
-      float y2 = _interfaces[i]->getIdealSize().y/(float)idealSize.y;
-      _interfaces[i]->setViewport(sf::FloatRect(_viewportMin.x,
-                                                _viewportMin.y+y1*_viewportMax.y,
-                                                _viewportMax.x,
-                                                y2*_viewportMax.y));
-      y1+=y2;
+      float y1=0;
+      for (unsigned int i=0;i<_interfaces.size();i++)
+      {
+        _interfaces[i]->setViewSize(_clientSize.x,
+                                    _interfaces[i]->getIdealSize().y*_clientSize.y/(float)idealSize.y);
+        float y2 = _interfaces[i]->getIdealSize().y/(float)idealSize.y;
+        _interfaces[i]->setViewport(sf::FloatRect(_viewportMin.x,
+                                                  _viewportMin.y+y1*_viewportMax.y,
+                                                  _viewportMax.x,
+                                                  y2*_viewportMax.y));
+        y1+=y2;
+      }
+    }
+  } else { //Cas pas de zoom et on commence en bas
+    if (_clientSize.y >= idealSize.y) //Plus de place que necessaire
+    {
+      float y1=1.f-(float)idealSize.y/(float)_clientSize.y;
+      for (unsigned int i=0;i<_interfaces.size();i++)
+      {
+        float sfac=1.f;//_clientSize.y/(float)idealSize.y;
+        _interfaces[i]->setViewSize(_clientSize.x/sfac,_interfaces[i]->getIdealSize().y);
+        float y2 = sfac*_interfaces[i]->getIdealSize().y/(float)_clientSize.y;
+        _interfaces[i]->setViewport(sf::FloatRect(_viewportMin.x,
+                                        _viewportMin.y+y1*_viewportMax.y,
+                                        _viewportMax.x,
+                                        y2*_viewportMax.y));
+        y1+=y2;
+      }
+    }
+    else //on alloue proportionellement à la place dispo
+    {
+      float y1=0;
+      for (unsigned int i=0;i<_interfaces.size();i++)
+      {
+        _interfaces[i]->setViewSize(_clientSize.x,
+                                    _interfaces[i]->getIdealSize().y*_clientSize.y/(float)idealSize.y);
+        float y2 = _interfaces[i]->getIdealSize().y/(float)idealSize.y;
+        _interfaces[i]->setViewport(sf::FloatRect(_viewportMin.x,
+                                                  _viewportMin.y+y1*_viewportMax.y,
+                                                  _viewportMax.x,
+                                                  y2*_viewportMax.y));
+        y1+=y2;
+      }
     }
   }
 }

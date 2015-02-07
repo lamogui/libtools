@@ -55,6 +55,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
         return _isRepeated;
       }
       
+      void setSmooth(bool);
+      void setRepeated(bool);
+      
     private:
       unsigned int _realSize;
       unsigned int _size;

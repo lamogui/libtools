@@ -33,7 +33,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 unsigned int Music::nextFrame(Signal& left, Signal& right)
 {
-  const unsigned int decoded=_decoder->nextFrame(left,right);
+  const unsigned int decoded=_decoder->fetch(left,right);
   if (decoded) {
     const float left_energy=left.energy();
     const float right_energy=right.energy();

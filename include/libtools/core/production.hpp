@@ -1,4 +1,3 @@
-
 /*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE666 COPYDOWN. 
@@ -20,59 +19,58 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * THIS FILE IS PART OF LIBTOOLS 
   * SECURITY LEVEL : 8 (CRITICAL)  
   * VISIBILITY     : PROTECTED
-  * Â© COPYDOWNâ„¢ LAMOGUI ALL RIGHTS RESERVED 
+  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
   *
-  * FILE         : decoder.hpp
-  * AUTHOR       : Julien De Loor (julien.deloor@gmail.com)
-  * VERSION      : 1.1
-  * DEPENDENCIES : signal.hpp
-  *                config.h
-  *                production.hpp
+  * FILE         : production.hpp
+  * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
+  * VERSION      : V1.0
+  * DEPENDENCIES : config.h
+  *                signal.hpp
   */
-
-
-
-#ifndef LIBTOOLS_DECODER_HPP
-#define LIBTOOLS_DECODER_HPP
+  
+#ifndef LIBTOOLS_PRODUCTION_HPP
+#define LIBTOOLS_PRODUCTION_HPP
 
 #include <libtools/public/config.h>
 #include <libtools/core/signal.hpp>
-#include <libtools/core/production.hpp>
+#include <map>
 
-class LIBTOOLS_PRIVATE Decoder : public MusicProduction
+
+class Production
 {
   public:
-    Decoder() {}
-    virtual ~Decoder() {}
-
-    bool open(const string_t& filename);
-    inline string_t name() { return _name; }
-    inline string_t author() { return _artist; }
-    inline string_t filename() { return _filename; }
-    inline Production::GenreId genre() {return _genre;}
+    virtual ~Production() {}
     
+    typedef int32_t RoleId;
+    typedef int32_t GenreId;
+    
+    virtual string_t name()=0; //Title, name of the production
+    virtual string_t author()=0; //Main author, alone or presented with '&' in the string
+    //Return true if the production have a author list (= if implemented)
+    inline virtual bool authors(std::multimap<RoleId,string_t>& list) {
+      (void)list;
+      return false;
+    }
+    inline virtual string_t group() { //Whatever (demo,music)group/label/producer
+      return "";
+    }
+    virtual GenreId genre()=0;    
+};
+
+
+class MusicProduction : public Production, public AbstractStereoSignalSource
+{
+  public:
+    virtual ~MusicProduction() {} 
+    virtual string_t name()=0; //Title, name of the production
+    virtual string_t author()=0; //Main author, alone or presented with '&' in the string
+    virtual Production::GenreId genre()=0;    
     virtual unsigned int fetch(Signal& outleft, Signal& outright) = 0;
-  
+    
     virtual bool ended() = 0; //can fetch ?
     virtual void rewind() = 0; //restart the production
     virtual double length() = 0; //Length of the music in seconds
   
-  protected:
-  
-    virtual bool _open(const string_t& filename)=0;
-    
-    void setName(const string_t& name);
-    void setAuthor(const string_t& artist);
-    void setGenre(const string_t& genre);
-    
-  private:
-  
-    void _namereset();
-  
-    string_t _filename;
-    string_t _name;
-    string_t _artist;
-    Production::GenreId _genre;
 };
 
 #endif

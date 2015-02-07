@@ -41,7 +41,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/core/tempo.hpp>
 #include <vector>
 
-class LIBTOOLS_PRIVATE Music
+class LIBTOOLS_PRIVATE Music 
 {
   public:
     Music(Decoder& decoder,FFT& fft):
@@ -59,13 +59,11 @@ class LIBTOOLS_PRIVATE Music
     bool open(const string_t& filename) { _reset(); return _decoder->open(filename); }
     bool ended() { return _decoder->ended(); }
     void rewind() { _reset(); _decoder->rewind(); }
-    unsigned int frames() { return _decoder->frames(); } 
     unsigned int nextFrame(Signal& left, Signal& right);
     
     inline string_t name() { return _decoder->name(); }
-    inline string_t artist() { return _decoder->artist(); }
-    inline string_t album() { return _decoder->album(); }
-    inline string_t genre() { return _decoder->genre(); }
+    inline string_t author() { return _decoder->author(); }
+    inline Production::GenreId genre() { return _decoder->genre(); }
     inline float bpm() {return _bpm;}//Return BPM in real time -1 if failed 
     inline float energy() { return _energy; } //return real-time Energy
     inline float bass() { return _bass; }

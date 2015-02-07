@@ -81,27 +81,26 @@ class LIBTOOLS_PRIVATE BassDecoder : public Decoder
     BassDecoder();
     virtual ~BassDecoder();
 
-    
-    virtual bool open(const string_t& filename);
     inline virtual bool ended() {return _ended;}
     virtual void rewind();
-    virtual unsigned int frames(); 
+    unsigned int frames();
+    virtual double length();
+    
     void reset();
-    inline virtual string_t name() { return _name; }
-    inline virtual string_t artist() { return _artist; }
-    inline virtual string_t album() { return _album; }
-    inline virtual string_t genre() { return _genre; }
-    virtual unsigned int nextFrame(Signal& left, Signal& right);
+    
+    virtual unsigned int fetch(Signal& outleft, Signal& outright);
 
     static string_t handleBassInitError();
     static string_t handleBassStreamCreateError();
     static string_t handleBassChannelPlayError();
     
   protected:
-    string_t _name;
-    string_t _artist;
-    string_t _album;
-    string_t _genre;
+    virtual bool _open(const string_t& filename);
+    bool prepareDecode();
+    bool decodeID3v2();
+    bool decodeID3v1();
+    bool decodeOGGTag();
+  
   
     HANDLE _music;
     bool _mod;

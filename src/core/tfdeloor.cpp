@@ -137,7 +137,7 @@ bool TFDeLoorPrecomputer::start(Decoder* decoder)
   _decoder=decoder;
   if (_decoder) {   
     _onAnalyse=true;
-    _frames=_decoder->frames();
+    _frames=_decoder->length()/Signal::refreshRate;
     _thread.launch();
     return true;
   }
@@ -156,7 +156,7 @@ void TFDeLoorPrecomputer::_compute()
   for (unsigned int k =0; k < _frames; k++) 
   {
     _mutex.unlock();
-    _decoder->nextFrame(l,r);
+    _decoder->fetch(l,r);
     ltfd->pushSignal(l);
     rtfd->pushSignal(r);
     ltfd->computeModule();

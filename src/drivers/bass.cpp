@@ -38,8 +38,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 #endif
 
-#if defined(LIBTOOLS_WINDOWS) || defined(BASS_H)
+#include <cstdio>
 
+#if defined(LIBTOOLS_WINDOWS) || defined(BASS_H)
 
 string_t BassDecoder::handleBassInitError()
 {
@@ -161,7 +162,7 @@ void BassDecoder::reset()
   _ended=true;
 }
 
-bool BassDecoder::open(const string_t& filename)
+bool BassDecoder::_open(const string_t& filename)
 {
   reset();
   _mod=false;
@@ -228,6 +229,11 @@ bool BassDecoder::open(const string_t& filename)
     if (_infos.freq != Signal::frequency)
       std::cout << "warning : file rate (" << _infos.freq << "Hz) is different of " << Signal::frequency << "Hz" << std::endl;
     _ended=false;
+    
+    if (prepareDecode()) {
+      decodeID3v1();
+    }
+    
   }
   #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
   } else {
@@ -237,7 +243,7 @@ bool BassDecoder::open(const string_t& filename)
   return (_music);
 }
 
-unsigned int BassDecoder::nextFrame(Signal& left, Signal& right){
+unsigned int BassDecoder::fetch(Signal& left, Signal& right){
   if (_music)
   {
     DWORD readed=0;
@@ -310,6 +316,7 @@ void BassDecoder::rewind()
   }
 }
 
+
 unsigned int BassDecoder::frames()
 {
   #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
@@ -331,6 +338,81 @@ unsigned int BassDecoder::frames()
     return frames;
   }
   return 0;
+}
+
+double BassDecoder::length() {
+  #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
+  if (!BASS_ChannelGetLength || 
+      !BASS_ChannelBytes2Seconds || 
+      !BASS_ErrorGetCode)
+  {
+    std::cerr << "Missing BASS_ChannelGetLength, BASS_ChannelBytes2Seconds or BASS_ErrorGetCode function" << std::endl;
+    return -1;
+  }
+  #endif 
+
+  if (_music)
+  {
+    QWORD ret = BASS_ChannelGetLength((DWORD)_music,BASS_POS_BYTE);
+    if (ret==-1) return -1;
+    return BASS_ChannelBytes2Seconds((DWORD)_music,ret);
+  }
+  return -1;
+}
+
+
+bool BassDecoder::prepareDecode()
+{
+  #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
+  if (!BASS_ChannelGetTags)
+  {
+    std::cerr << "Missing BASS_ChannelGetTags function" << std::endl;
+    return false;
+  }
+  #endif 
+  if (!_music) return false;
+  return true;
+}
+
+bool BassDecoder::decodeID3v2(){
+  const char* tags=BASS_ChannelGetTags((DWORD)_music,(DWORD) BASS_TAG_ID3V2);
+  if (tags) {
+    unsigned int offset=0;
+    offset+= 3 + 2 ; //go to flags
+    bool have_extended = (tags[offset] & (1 << 6));
+  }
+  return false;
+}
+
+bool BassDecoder::decodeID3v1()
+{
+  const char* tags=BASS_ChannelGetTags((DWORD)_music,(DWORD) BASS_TAG_ID3);
+  if (tags) {
+    TAG_ID3 *id3=(TAG_ID3*)tags;
+    char buf[31]={0};
+    sprintf(buf,"%.30s",id3->title);
+    setName(string_t(buf));
+    sprintf(buf,"%.30s",id3->artist);
+    setAuthor(string_t(buf));
+    //setGenre(id3->genre);
+    return true;
+  }
+  return false;
+}
+
+
+
+bool BassDecoder::decodeOGGTag(){
+  const char* tags=BASS_ChannelGetTags((DWORD)_music,(DWORD) BASS_TAG_OGG);
+  if (tags) {
+    while (*tags) {
+      string_t comment;
+#if defined(SFML_STRING_HPP) 
+  
+#endif
+    }
+  }
+  return false;
 }
 
 #endif
