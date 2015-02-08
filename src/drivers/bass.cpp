@@ -269,10 +269,11 @@ unsigned int BassDecoder::fetch(Signal& left, Signal& right){
       for (unsigned int i=readed; i< _bytesFrame ;i++)
         ((char*)_samplesForSignals)[i]=0;
     }
+    const unsigned int signal_size=Signal::size;
     if (_infos.chans>=2)
     {
       unsigned int k=0;
-		  for (unsigned int i=0; i < Signal::size;)
+		  for (unsigned int i=0; i < signal_size;)
 		  {
 			  left.samples[i]=_samplesForSignals[k++];
 			  right.samples[i++]=_samplesForSignals[k++];
@@ -282,7 +283,7 @@ unsigned int BassDecoder::fetch(Signal& left, Signal& right){
     else if (_infos.chans==1) //mono
     {
       unsigned int k=0;
-		  for (unsigned int i=0; i < Signal::size;)
+		  for (unsigned int i=0; i < signal_size;)
 		  {
 			  left.samples[i]=_samplesForSignals[k];
 			  right.samples[i++]=_samplesForSignals[k++];

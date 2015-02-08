@@ -23,7 +23,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   *
   * FILE         : bassproc.c
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
-  * VERSION      : 1.0 
+  * VERSION      : 1.2 
   * DEPENDENCIES : bassproc.h
   */
   
@@ -99,6 +99,47 @@ int load_bassflac_procs(const char* bassflacdllname)
 }
 
 #endif //defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
+
+#if defined(LIBTOOLS_WINDOWS) && !defined(BASSASIO_H)
+
+BASS_ASIO_GETDEVICEINFO_PROC* BASS_ASIO_GetDeviceInfo=0;
+BASS_ASIO_INIT_PROC* BASS_ASIO_Init=0;
+BASS_ASIO_GETINFO_PROC* BASS_ASIO_GetInfo=0;
+BASS_ASIO_SETRATE_PROC* BASS_ASIO_SetRate=0;
+BASS_ASIO_GETRATE_PROC* BASS_ASIO_GetRate=0;
+BASS_ASIO_CHANNELGETINFO_PROC* BASS_ASIO_ChannelGetInfo=0;
+BASS_ASIO_CHANNELENABLE_PROC* BASS_ASIO_ChannelEnable=0;
+BASS_ASIO_CHANNELJOIN_PROC* BASS_ASIO_ChannelJoin=0;
+BASS_ASIO_CHANNELSETFORMAT_PROC* BASS_ASIO_ChannelSetFormat=0;
+BASS_ASIO_START_PROC* BASS_ASIO_Start=0;
+BASS_ASIO_STOP_PROC* BASS_ASIO_Stop=0;
+BASS_ASIO_CHANNELRESET_PROC* BASS_ASIO_ChannelReset=0;
+BASS_ASIO_ISSTARTED_PROC* BASS_ASIO_IsStarted=0;
+
+static HMODULE bassasio_dll=0;
+int load_bassasio_procs(const char* bassasiodllname)
+{
+  int loaded=0;
+  if (!bassasio_dll) {
+    bassasio_dll=LoadLibrary(bassasiodllname);
+  }
+  if (!bassasio_dll) return -1;
+  if (BASS_ASIO_Init=(BASS_ASIO_INIT_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_Init")) loaded++;
+  if (BASS_ASIO_GetInfo=(BASS_ASIO_GETINFO_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_GetInfo")) loaded++ ;
+  if (BASS_ASIO_SetRate=(BASS_ASIO_SETRATE_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_SetRate")) loaded++ ;
+  if (BASS_ASIO_GetRate=(BASS_ASIO_GETRATE_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_GetRate")) loaded++ ;
+  if (BASS_ASIO_ChannelGetInfo=(BASS_ASIO_CHANNELGETINFO_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_ChannelGetInfo")) loaded++ ;
+  if (BASS_ASIO_ChannelEnable=(BASS_ASIO_CHANNELENABLE_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_ChannelEnable")) loaded++ ;
+  if (BASS_ASIO_ChannelJoin=(BASS_ASIO_CHANNELJOIN_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_ChannelJoin")) loaded++ ;
+  if (BASS_ASIO_ChannelSetFormat=(BASS_ASIO_CHANNELSETFORMAT_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_ChannelSetFormat")) loaded++ ;
+  if (BASS_ASIO_Start=(BASS_ASIO_START_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_Start")) loaded++ ;
+  if (BASS_ASIO_Stop=(BASS_ASIO_STOP_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_Stop")) loaded++ ;
+  if (BASS_ASIO_ChannelReset=(BASS_ASIO_CHANNELRESET_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_ChannelReset")) loaded++ ;
+  if (BASS_ASIO_IsStarted=(BASS_ASIO_ISSTARTED_PROC*)GetProcAddress(bassasio_dll,"BASS_ASIO_IsStarted")) loaded++;
+  return loaded;
+}
+
+#endif //defined(LIBTOOLS_WINDOWS) && !defined(BASSASIO_H)
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   *
   * FILE         : bassproc.h
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
-  * VERSION      : 1.0 
+  * VERSION      : 1.2 
   * DEPENDENCIES : config.h
   */
   
@@ -283,6 +283,157 @@ int load_bass_procs(const char* bassdllname);
 int load_bassflac_procs(const char* bassflacdllname);
 
 #endif //LIBTOOLS_WINDOWS
+
+
+
+#if defined(LIBTOOLS_WINDOWS) && !defined(BASSASIO_H)
+
+#include <wtypes.h>
+
+#ifndef BASSASIODEF
+#define BASSASIODEF(f) WINAPI f
+#endif
+
+// error codes returned by BASS_ASIO_ErrorGetCode
+#define BASS_OK				0	// all is OK
+#define BASS_ERROR_FILEOPEN	2	// can't open the file
+#define BASS_ERROR_DRIVER	3	// can't find a free/valid driver
+#define BASS_ERROR_FORMAT	6	// unsupported sample format
+#define BASS_ERROR_INIT		8	// BASS_ASIO_Init has not been successfully called
+#define BASS_ERROR_START	9	// BASS_ASIO_Start has/hasn't been called
+#define BASS_ERROR_ALREADY	14	// already initialized/started
+#define BASS_ERROR_NOCHAN	18	// no channels are enabled
+#define BASS_ERROR_ILLPARAM	20	// an illegal parameter was specified
+#define BASS_ERROR_DEVICE	23	// illegal device number
+#define BASS_ERROR_NOTAVAIL	37	// not available
+#define BASS_ERROR_UNKNOWN	-1	// some other mystery error
+
+// BASS_ASIO_Init flags
+#define BASS_ASIO_THREAD	1 // host driver in dedicated thread
+#define BASS_ASIO_JOINORDER	2 // order joined channels by when they were joined
+
+// device info structure
+typedef struct {
+	const char *name;	// description
+	const char *driver;	// driver
+} BASS_ASIO_DEVICEINFO;
+
+typedef struct {
+	char name[32];	// driver name
+	DWORD version;	// driver version
+	DWORD inputs;	// number of inputs
+	DWORD outputs;	// number of outputs
+	DWORD bufmin;	// minimum buffer length
+	DWORD bufmax;	// maximum buffer length
+	DWORD bufpref;	// preferred/default buffer length
+	int bufgran;	// buffer length granularity
+	DWORD initflags; // BASS_ASIO_Init "flags" parameter
+} BASS_ASIO_INFO;
+
+typedef struct {
+	DWORD group;
+	DWORD format;	// sample format (BASS_ASIO_FORMAT_xxx)
+	char name[32];	// channel name
+} BASS_ASIO_CHANNELINFO;
+
+// sample formats
+#define BASS_ASIO_FORMAT_16BIT	16 // 16-bit integer
+#define BASS_ASIO_FORMAT_24BIT  17 // 24-bit integer
+#define BASS_ASIO_FORMAT_32BIT  18 // 32-bit integer
+#define BASS_ASIO_FORMAT_FLOAT  19 // 32-bit floating-point
+
+// BASS_ASIO_ChannelReset flags
+#define BASS_ASIO_RESET_ENABLE	1 // disable channel
+#define BASS_ASIO_RESET_JOIN	2 // unjoin channel
+#define BASS_ASIO_RESET_PAUSE	4 // unpause channel
+#define BASS_ASIO_RESET_FORMAT	8 // reset sample format to native format
+#define BASS_ASIO_RESET_RATE	16 // reset sample rate to device rate
+#define BASS_ASIO_RESET_VOLUME	32 // reset volume to 1.0
+
+// BASS_ASIO_ChannelIsActive return values
+#define BASS_ASIO_ACTIVE_DISABLED	0
+#define BASS_ASIO_ACTIVE_ENABLED	1
+#define BASS_ASIO_ACTIVE_PAUSED		2
+
+typedef DWORD (CALLBACK ASIOPROC)(BOOL input, DWORD channel, void *buffer, DWORD length, void *user);
+/* ASIO channel callback function.
+input  : Input? else output
+channel: Channel number
+buffer : Buffer containing the sample data
+length : Number of bytes
+user   : The 'user' parameter given when calling BASS_ASIO_ChannelEnable
+RETURN : The number of bytes written (ignored with input channels) */
+
+typedef void (CALLBACK ASIONOTIFYPROC)(DWORD notify, void *user);
+/* Driver notification callback function.
+notify : The notification (BASS_ASIO_NOTIFY_xxx)
+user   : The 'user' parameter given when calling BASS_ASIO_SetNotify */
+
+// driver notifications
+#define BASS_ASIO_NOTIFY_RATE	1 // sample rate change
+#define BASS_ASIO_NOTIFY_RESET	2 // reset (reinitialization) request
+
+typedef DWORD BASSASIODEF(BASS_ASIO_GETVERSION_PROC)();
+typedef BOOL BASSASIODEF(BASS_ASIO_SETUNICODE_PROC)(BOOL unicode);
+typedef DWORD BASSASIODEF(BASS_ASIO_ERRORGETCODE_PROC)();
+typedef BOOL BASSASIODEF(BASS_ASIO_GETDEVICEINFO_PROC)(DWORD device, BASS_ASIO_DEVICEINFO *info);
+typedef DWORD BASSASIODEF(BASS_ASIO_ADDDEVICE_PROC)(const GUID *clsid, const char *driver, const char *name);
+typedef BOOL BASSASIODEF(BASS_ASIO_SETDEVICE_PROC)(DWORD device);
+typedef DWORD BASSASIODEF(BASS_ASIO_GETDEVICE_PROC)();
+typedef BOOL BASSASIODEF(BASS_ASIO_INIT_PROC)(DWORD device, DWORD flags);
+typedef BOOL BASSASIODEF(BASS_ASIO_FREE_PROC)();
+typedef BOOL BASSASIODEF(BASS_ASIO_SETNOTIFY_PROC)(ASIONOTIFYPROC *proc, void *user);
+typedef BOOL BASSASIODEF(BASS_ASIO_CONTROLPANEL_PROC)();
+typedef BOOL BASSASIODEF(BASS_ASIO_GETINFO_PROC)(BASS_ASIO_INFO *info);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHECKRATE_PROC)(double rate);
+typedef BOOL BASSASIODEF(BASS_ASIO_SETRATE_PROC)(double rate);
+typedef double BASSASIODEF(BASS_ASIO_GETRATE_PROC)();
+typedef BOOL BASSASIODEF(BASS_ASIO_START_PROC)(DWORD buflen, DWORD threads);
+typedef BOOL BASSASIODEF(BASS_ASIO_STOP_PROC)();
+typedef BOOL BASSASIODEF(BASS_ASIO_ISSTARTED_PROC)();
+typedef DWORD BASSASIODEF(BASS_ASIO_GETLATENCY_PROC)(BOOL input);
+typedef float BASSASIODEF(BASS_ASIO_GETCPU_PROC)();
+typedef BOOL BASSASIODEF(BASS_ASIO_MONITOR_PROC)(int input, DWORD output, DWORD gain, DWORD state, DWORD pan);
+
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELGETINFO_PROC)(BOOL input, DWORD channel, BASS_ASIO_CHANNELINFO *info);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELRESET_PROC)(BOOL input, int channel, DWORD flags);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELENABLE_PROC)(BOOL input, DWORD channel, ASIOPROC *proc, void *user);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELENABLEMIRROR_PROC)(DWORD channel, BOOL input2, DWORD channel2);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELJOIN_PROC)(BOOL input, DWORD channel, int channel2);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELPAUSE_PROC)(BOOL input, DWORD channel);
+typedef DWORD BASSASIODEF(BASS_ASIO_CHANNELISACTIVE_PROC)(BOOL input, DWORD channel);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELSETFORMAT_PROC)(BOOL input, DWORD channel, DWORD format);
+typedef DWORD BASSASIODEF(BASS_ASIO_CHANNELGETFORMAT_PROC)(BOOL input, DWORD channel);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELSETRATE_PROC)(BOOL input, DWORD channel, double rate);
+typedef double BASSASIODEF(BASS_ASIO_CHANNELGETRATE_PROC)(BOOL input, DWORD channel);
+typedef BOOL BASSASIODEF(BASS_ASIO_CHANNELSETVOLUME_PROC)(BOOL input, int channel, float volume);
+typedef float BASSASIODEF(BASS_ASIO_CHANNELGETVOLUME_PROC)(BOOL input, int channel);
+typedef float BASSASIODEF(BASS_ASIO_CHANNELGETLEVEL_PROC)(BOOL input, DWORD channel);
+
+
+//extern
+#ifndef BASSPROC_IMPLEMENT
+
+extern BASS_ASIO_GETDEVICEINFO_PROC* BASS_ASIO_GetDeviceInfo;
+extern BASS_ASIO_INIT_PROC* BASS_ASIO_Init;
+extern BASS_ASIO_GETINFO_PROC* BASS_ASIO_GetInfo;
+extern BASS_ASIO_SETRATE_PROC* BASS_ASIO_SetRate;
+extern BASS_ASIO_GETRATE_PROC* BASS_ASIO_GetRate;
+extern BASS_ASIO_CHANNELGETINFO_PROC* BASS_ASIO_ChannelGetInfo;
+extern BASS_ASIO_CHANNELENABLE_PROC* BASS_ASIO_ChannelEnable;
+extern BASS_ASIO_CHANNELJOIN_PROC* BASS_ASIO_ChannelJoin;
+extern BASS_ASIO_CHANNELSETFORMAT_PROC* BASS_ASIO_ChannelSetFormat;
+extern BASS_ASIO_START_PROC* BASS_ASIO_Start;
+extern BASS_ASIO_STOP_PROC* BASS_ASIO_Stop;
+extern BASS_ASIO_CHANNELRESET_PROC* BASS_ASIO_ChannelReset;
+extern BASS_ASIO_ISSTARTED_PROC* BASS_ASIO_IsStarted;
+
+
+#endif
+
+
+#endif //defined(LIBTOOLS_WINDOWS) && !defined(BASSASIO_H)
+
 
 #ifdef __cplusplus
 }

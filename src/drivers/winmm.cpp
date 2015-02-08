@@ -102,10 +102,6 @@ bool WinmmDriver::init(unsigned int rate)
   buffer = (unsigned char*) HeapAlloc(GetProcessHeap(), 
                                       HEAP_ZERO_MEMORY, 
                                       totalBufferSize); 
-
-  /*
-   * UGLY !!!
-   */
   _waveBlocks = (WAVEHDR*)buffer;
   buffer += sizeof(WAVEHDR) * _nbBlocks;
   for(unsigned int i = 0; i < _nbBlocks; i++) {

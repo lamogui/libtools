@@ -28,9 +28,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * DEPENDENCIES : config.h
   *                signal.hpp
   *                audiostream.hpp
-  * ROLE         : Defini les contraintes que doivent 
-  *                respecter les drivers pour être 
-  *                compatible avec AudioStream
+  * ROLE         : Defini une interface vers un driver audio en sortie steréo
   */
 
 #ifndef LIBTOOLS_AUDIODRIVER_HPP
@@ -46,12 +44,6 @@ class LIBTOOLS_PUBLIC AudioDriver : public noncopyable_c
   public:
     AudioDriver() {}
     virtual ~AudioDriver() {}
-    
-    //Initialize the driver 
-    //if the driver doesn't support rate he must use a supported rate and reconfigure 
-    //signals by calling globalSignalConfiguration ! 
-    //Be sure there is no thread with signal running when call this function
-    //virtual bool init(unsigned int rate)=0;
     
     //(Re)Start the driver thread
     //It should now play buffered samples 
@@ -73,10 +65,6 @@ class LIBTOOLS_PUBLIC AudioDriver : public noncopyable_c
     virtual unsigned int getBufferedSamplesCount()=0;
     
     
-    
-    //Check if the driver has stalled since the last time it has stalled
-    //Stalled mean décrocher in french the driver, it happen when the driver have not enough samples.
-    //virtual bool haveStalled()=0;
    
 };
 
