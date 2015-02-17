@@ -24,8 +24,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   *
   * FILE         : visualsignal.hpp
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
-  * VERSION      : V2.0 olol
+  * VERSION      : V2.0 
   * DEPENDENCIES : signal.hpp
+  *                circularpurger.hpp
   *                config.h
   */
 
@@ -47,6 +48,7 @@ class LIBTOOLS_PRIVATE VisualSignal
     int16_t clean;
     int16_t distord;
     int16_t linear;
+    int16_t grain;
     int16_t triangles;
 
   protected:

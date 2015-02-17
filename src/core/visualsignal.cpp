@@ -35,6 +35,7 @@ noise(0),
 clean(0),
 distord(0),
 linear(0),
+grain(0),
 triangles(0),
 previous(50),
 previous2(50),
@@ -57,6 +58,7 @@ void VisualSignal::update(const Signal& signal) {
   clean=0;
   distord=0;
   linear=0;
+  grain=0;
   triangles=0;
 
   const int previous_save=previous;
@@ -78,7 +80,9 @@ void VisualSignal::update(const Signal& signal) {
     //if ((d31 > 0 && dprevious < 0)||(d31 < 0 && dprevious > 0))
     //  noise += d3;
     if (d3>5) {
-      noise += d3;    }
+      noise += d3;    
+      grain++;
+    }
     else if ((d31 >= 0 && dprevious >= 0) || ( d31 < 0 && dprevious < 0)) {
       if (d3p <=3 && d3pp <=3 && ((d31 >= 0 && dprevious2 >= 0) || ( d31 < 0 && dprevious2 < 0)))
       {
@@ -100,8 +104,9 @@ void VisualSignal::update(const Signal& signal) {
   clean = clean*1024/size;
   distord = distord*1024/size;
   linear = linear*1024/size;
-
-  previous=previous_save;
+  grain = grain*1024/size;
+  
+  /*previous=previous_save;
   int min=100;
   int max=0;
   unsigned int x1=0;
@@ -150,5 +155,5 @@ void VisualSignal::update(const Signal& signal) {
 
   
   triangles = triangles*1024/size;
-
+*/
 }

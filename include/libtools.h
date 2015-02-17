@@ -53,6 +53,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/core/file.hpp>
 #include <libtools/core/settings.hpp>
 #include <libtools/core/signal.hpp>
+#include <libtools/core/circularpurger.hpp>
 #include <libtools/core/visualsignal.hpp>
 #include <libtools/core/note.hpp>
 #include <libtools/core/fft.hpp>

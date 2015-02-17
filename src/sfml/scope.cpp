@@ -32,6 +32,7 @@ AND RENUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   
 #include <libtools/sfml/scope.hpp>
 #include <libtools/core/settings.hpp>
+#include <libtools/sfml/glslrender.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -289,7 +290,7 @@ void VisualSignalInterface::setVisualSignal(VisualSignal* s) {
   _visual=s;
 }
 
-void VisualSignalInterface::setCouleur(int rouge,int vert,int bleu, int jaune) {
+void VisualSignalInterface::setColor(int rouge,int vert,int bleu, int jaune) {
   _rouge.setSize(sf::Vector2f(10,rouge));
   _vert.setSize(sf::Vector2f(10,vert));
   _bleu.setSize(sf::Vector2f(10,bleu));
@@ -305,7 +306,7 @@ void VisualSignalInterface::update()
   text << "clean: " << _visual->clean << std::endl;
   text << "distord: " << _visual->distord << std::endl;
   text << "linear: " << _visual->linear << std::endl;
-  text << "triangles: " << _visual->triangles << std::endl;
+  text << "grain: " << _visual->grain << std::endl;
   text.flush();
 
   _text.setString(text.str().c_str());
@@ -316,6 +317,13 @@ void VisualSignalInterface::update()
   _linear.setSize(sf::Vector2f(10, _visual->linear*80/3072));
 
   }
+}
+
+void VisualSignalInterface::addRender(GLSLRender& render,float size)
+{
+  render.setPosition(sf::Vector2f(256.f+size*0.5f,50));
+  render.setScale(sf::Vector2f(size,-100.f));
+  addDrawable(&render);
 }
 
 

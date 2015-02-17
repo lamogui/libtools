@@ -92,6 +92,8 @@ class ScopeA : public Interface
 };
 
 
+class GLSLRender;
+
 class VisualSignalInterface : public Interface
 {
   public:
@@ -100,8 +102,8 @@ class VisualSignalInterface : public Interface
 
     virtual void update();
     void setVisualSignal(VisualSignal* s);
-    void setCouleur(int rouge,int ver,int bleu, int jaune);
-
+    void setColor(int rouge,int ver,int bleu, int jaune);
+    void addRender(GLSLRender& render,float size);
 
   private:
     VisualSignal* _visual;
