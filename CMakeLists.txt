@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 2.8.11.2)
+cmake_minimum_required(VERSION 3.1.3)
 project(libtools)
 
 # option(SFML_AUDIO_DRIVER "Build with SFML-AUDIO Driver support" OFF)

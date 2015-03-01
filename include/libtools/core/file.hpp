@@ -77,5 +77,59 @@ class LIBTOOLS_PRIVATE AbstractFileParser
   protected:
 };
 
+#ifdef SFML_INPUTSTREAM_HPP
+class FileStream : public sf::InputStream
+{
+public :
+
+    FileStream();
+
+    virtual ~FileStream();
+
+    bool open(const string_t& filename);
+
+    virtual int64_t read(void* data, int64_t size);
+
+    virtual int64_t seek(int64_t position);
+
+    virtual int64_t tell();
+
+    virtual int64_t getSize();
+    
+    virtual string_t getFilename();
+    
+    virtual string_t getCompleteFilename();
+    
+    void save(const string_t& name);
+
+protected :
+
+    std::FILE* m_file;
+    string_t _filename;
+};
+
+class CryptedFileStream : public FileStream
+{
+   public :
+
+      CryptedFileStream();
+
+      virtual ~CryptedFileStream();
+
+      bool open(const string_t& filename);
+
+      virtual int64_t read(void* data, int64_t size);
+
+      virtual int64_t seek(int64_t position);
+      
+
+   private :
+      string_t _key;
+      std::size_t _offset;
+
+};
+
+#endif
+
 
 #endif

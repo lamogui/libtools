@@ -39,6 +39,10 @@ extern "C" {
 extern const char* lightsaber_signal_fs_src;
 extern const char* classic_signal_fs_src;
 
+//flux
+extern const char* classic_flux_fs_src;
+extern const char* classic_cardio_flux_fs_src;
+
 //FFT
 extern const char* vls_fft_fs_src;
 

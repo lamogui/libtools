@@ -46,7 +46,7 @@ const char* vls_fft_fs_src=
   "if (yflip) mv.y=1.0-mv.y;"
   "float coord = mv.x*0.19;" // -> 22100 Hz to 4200Hz
   //Attention normalisé pour pour FFT entre 0 et 1.0 SANS symétrie
-  "float texturev=sqrt(texture1D(spectrum, coord));"
+  "float texturev=sqrt(texture1D(spectrum, coord).x);"
   "if(texturev >= mv.y ) {"
       "if (coord < basslimit)"
           "gl_FragColor = vec4(0.7+0.3*mv.y,(1.-mv.y)*.75,0.3,1.);"

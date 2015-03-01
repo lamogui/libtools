@@ -45,11 +45,15 @@ const char* lightsaber_signal_fs_src =
 "void main() {"
   "float vs;"
   "if (reversed)"
-    "vs=texture1D(signal, 1.0-v.x);"
+    "vs=texture1D(signal, 1.0-v.x).x;"
   "else "
-    "vs=texture1D(signal, v.x);"
+    "vs=texture1D(signal, v.x).x;"
+  /*
   "const float eps=vs-v.y;"
   "const float thick=thickness*0.5;"
+  */
+  "float eps=vs-v.y;" /* fucking intel graphics compliance */
+  "float thick=thickness*0.5;"
   "if (eps > -thick && eps < thick)"
     "gl_FragColor = mix(vec4(1.0,1.0,1.0,1.0),color,pow(abs(eps/thick),1.5));"
   "else "
@@ -65,12 +69,89 @@ const char* classic_signal_fs_src=
 "void main() {"
   "float vs;"
   "if (reversed)"
-    "vs=texture1D(signal, 1.0-v.x);"
+    "vs=texture1D(signal, 1.0-v.x).x;"
   "else "
-    "vs=texture1D(signal, v.x);"
+    "vs=texture1D(signal, v.x).x;"
+  /*
   "const float eps=vs-v.y;"
   "const float thick=thickness*0.5;"
+  */
+  "float eps=vs-v.y;" /* fucking intel graphics compliance */
+  "float thick=thickness*0.5;"
   "if (eps > -thick && eps < thick)"
+    "gl_FragColor = vec4(color.rgb, color.a*(1.0-pow(abs(eps/thick),1.5)));"
+  "else "
+    "gl_FragColor = vec4(0.,0.,0.0,0.0);"
+"}";
+
+const char* classic_flux_fs_src=
+"varying vec2 v;"
+"uniform sampler1D flux;"
+"uniform float offset;"
+"uniform float step;"
+"uniform float thickness;"
+"uniform bool reversed;"
+"uniform vec4 color;"
+"void main() {"
+  "float pvs;"
+  "float vs;"
+  /*"float m=1.0+0.5*step;" use setRepeated on the sampler*/ 
+  
+  "if (reversed) {"
+    "float x=offset-v.x;"
+    "vs=texture1D(flux,x).x;"
+    "if (v.x >= 1.0 - step || v.x <= step)"
+      "pvs=0.0;"
+    "else "
+      "pvs=texture1D(flux,x-step).x;"
+    
+  "} else {"
+    "float x=offset-(1.0-(v.x+0.5*step));"
+    "vs=texture1D(flux,x).x;"
+    "if (v.x <= step)"
+      "pvs=vs;"
+    "else "
+      "pvs=texture1D(flux,x-step).x;"
+    
+  "}"
+  
+  
+  /*
+  "const float eps=vs-v.y;"
+  "const float thick=thickness*0.5;"
+  */
+  "float eps=vs-v.y;" /* fucking intel graphics compliance */
+  "float thick=thickness*0.5;"
+  "if (abs(vs-pvs) > thickness && ((v.y > vs && v.y < pvs) || (v.y > pvs && v.y < vs)))"
+    "gl_FragColor = color;"
+  "else if (eps > -thick && eps < thick)"
+    "gl_FragColor = vec4(color.rgb, color.a*(1.0-pow(abs(eps/thick),1.5)));"
+  "else "
+    "gl_FragColor = vec4(0.,0.,0.0,0.0);"
+"}";
+
+const char* classic_cardio_flux_fs_src=
+"varying vec2 v;"
+"uniform sampler1D flux;"
+"uniform float offset;"
+"uniform float step;"
+"uniform float thickness;"
+"uniform vec4 color;"
+"void main() {"
+  "float pvs;"
+  "float vs;"
+  "float x=offset-v.x;"
+  "pvs=texture1D(flux, -x-step).x;"
+  "vs=texture1D(flux, -x).x;"
+  /*
+  "const float eps=vs-v.y;"
+  "const float thick=thickness*0.5;"
+  */
+  "float eps=vs-v.y;" /* fucking intel graphics compliance */
+  "float thick=thickness*0.5;"
+  "if (abs(vs-pvs) > thickness && ((v.y > vs && v.y < pvs) || (v.y > pvs && v.y < vs)))"
+    "gl_FragColor = color;"
+  "else if (eps > -thick && eps < thick)"
     "gl_FragColor = vec4(color.rgb, color.a*(1.0-pow(abs(eps/thick),1.5)));"
   "else "
     "gl_FragColor = vec4(0.,0.,0.0,0.0);"
