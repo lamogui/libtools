@@ -65,7 +65,7 @@ class LIBTOOLS_PRIVATE WinmmDriver : public AudioDriver
     void free();
   
     /*Win32 end block callback*/
-    static void CALLBACK _waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);
+    static void CALLBACK _waveOutProc(HWAVEOUT, UINT, DWORD_PTR, DWORD_PTR, DWORD_PTR);
     WAVEHDR* _waveBlocks;
     HWAVEOUT _hWaveOut;
     unsigned int _nbBlocks;

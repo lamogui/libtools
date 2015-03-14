@@ -41,7 +41,7 @@ void Decoder::_namereset() {
 }
 
 
-#if defined(SFML_STRING_HPP) 
+//#if defined(SFML_STRING_HPP) 
 static void remove_useless_spaces_before(string_t& str){
   while (!string_t_empty(str) && (str[0] == ' ' || str[0] == '_'))
     str.erase(0,1);
@@ -107,7 +107,7 @@ static void remove_file_extension(string_t& str) {
   }
 }
 
-#endif
+//#endif
 
 
 bool Decoder::open(const string_t& filename){

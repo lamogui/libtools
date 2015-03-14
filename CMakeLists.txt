@@ -38,6 +38,8 @@ file(GLOB src_core "src/core/*")
 file(GLOB src_public "src/public/*")
 #src_drivers
 file (GLOB src_drivers "src/drivers/*")
+#src_decoders
+file (GLOB src_decoders "src/decoders/*")
 #src_shaders
 file (GLOB src_shaders "src/shaders/*")
 #h
@@ -49,13 +51,14 @@ file(GLOB h_core "include/libtools/core/*")
 file(GLOB h_public "include/libtools/public/*")
 #h_drivers
 file (GLOB h_drivers "include/libtools/drivers/*")
-#h_drivers
-file (GLOB h_drivers "include/libtools/drivers/*")
+#h_decoders
+file (GLOB h_drivers "include/libtools/decoders/*")
 #all includes
 file (GLOB h_shaders "include/libtools/shaders/*")
 #src groups
 source_group("core" FILES  ${src_core} ${h_core})
 source_group("drivers" FILES  ${src_drivers} ${h_drivers})
+source_group("decoders" FILES  ${src_decoders} ${h_decoders})
 source_group("sfml" FILES  ${src_sfml} ${h_sfml})
 source_group("public" FILES  ${src_public} ${h_public})
 source_group("shaders" FILES  ${src_shaders} ${h_shaders})
@@ -70,6 +73,8 @@ if (BUILD_SFML2_IMPLEMENTATION)
     ${h_core}
     ${src_drivers}
     ${h_drivers}
+    ${src_decoders}
+    ${h_decoders}
     ${src_public}
     ${h_public}
     ${src_sfml}
@@ -99,6 +104,8 @@ if (BUILD_STL_2011_IMPLEMENTATION)
     ${h_core}
     ${src_drivers}
     ${h_drivers}
+    ${src_decoders}
+    ${h_decoders}
     ${src_public}
     ${h_public}
     ${src_shaders}

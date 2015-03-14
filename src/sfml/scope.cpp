@@ -31,7 +31,7 @@ AND RENUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   */
   
 #include <libtools/sfml/scope.hpp>
-#include <libtools/core/settings.hpp>
+#include <libtools/decoders/settings.hpp>
 #include <libtools/sfml/glslrender.hpp>
 
 #include <iostream>

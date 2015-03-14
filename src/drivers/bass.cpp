@@ -179,43 +179,43 @@ bool BassDecoder::_open(const string_t& filename)
   bass_unicode_string_t bass_unicode_str=string_t_to_bass_unicode_string_t(filename);
   void* unicode_filename=(void*)bass_unicode_str.c_str();
   
-  if (_music=(HANDLE)BASS_MusicLoad(FALSE, 
-                                    unicode_filename, 0,0,
-                                    BASS_MUSIC_PRESCAN | 
-                                    BASS_MUSIC_DECODE | 
-                                    BASS_SAMPLE_FLOAT |
-                                    BASS_UNICODE,
-                                    Signal::frequency))
+  if (_music=BASS_MusicLoad(FALSE, 
+                            unicode_filename, 0,0,
+                            BASS_MUSIC_PRESCAN | 
+                            BASS_MUSIC_DECODE | 
+                            BASS_SAMPLE_FLOAT |
+                            BASS_UNICODE,
+                            Signal::frequency))
 	{
 		_mod=true;
 	}
-	else if (_music=(HANDLE)BASS_StreamCreateFile(FALSE, 
-                                                unicode_filename, 0,0,
-                                                BASS_STREAM_PRESCAN |
-                                                BASS_STREAM_DECODE | 
-                                                BASS_SAMPLE_FLOAT | 
-                                                BASS_UNICODE));
+	else if (_music=BASS_StreamCreateFile(FALSE, 
+                                        unicode_filename, 0,0,
+                                        BASS_STREAM_PRESCAN |
+                                        BASS_STREAM_DECODE | 
+                                        BASS_SAMPLE_FLOAT | 
+                                        BASS_UNICODE));
 	else if (
 #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
            BASS_FLAC_StreamCreateFile && 
 #endif
-           (_music=(HANDLE)BASS_FLAC_StreamCreateFile(FALSE, 
-                                                     unicode_filename, 0,0,
-                                                     BASS_STREAM_PRESCAN | 
-                                                     BASS_STREAM_DECODE | 
-                                                     BASS_SAMPLE_FLOAT | 
-                                                     BASS_UNICODE)));
-	else if (_music=(HANDLE)BASS_StreamCreateURL((const char *)unicode_filename,0,
-                                               BASS_STREAM_DECODE | 
-                                               BASS_SAMPLE_FLOAT | 
-                                               BASS_UNICODE, 
-                                               (DOWNLOADPROC*) 0,
-                                               (void*)0));
+           (_music=BASS_FLAC_StreamCreateFile(FALSE, 
+                                              unicode_filename, 0,0,
+                                              BASS_STREAM_PRESCAN | 
+                                              BASS_STREAM_DECODE | 
+                                              BASS_SAMPLE_FLOAT | 
+                                              BASS_UNICODE)));
+	else if (_music=BASS_StreamCreateURL((const char *)unicode_filename,0,
+                                        BASS_STREAM_DECODE | 
+                                        BASS_SAMPLE_FLOAT | 
+                                        BASS_UNICODE, 
+                                        (DOWNLOADPROC*) 0,
+                                        (void*)0));
 	else if (
 #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
            BASS_FLAC_StreamCreateURL && 
 #endif
-           (_music=(HANDLE)BASS_FLAC_StreamCreateURL((const char *)unicode_filename,0,
+           (_music=BASS_FLAC_StreamCreateURL((const char *)unicode_filename,0,
                                                     BASS_STREAM_DECODE | 
                                                     BASS_SAMPLE_FLOAT | 
                                                     BASS_UNICODE, 
@@ -289,7 +289,7 @@ unsigned int BassDecoder::fetch(Signal& left, Signal& right){
 			  right.samples[i++]=_samplesForSignals[k++];
 		  }
     }
-    return readed;
+    return readed/sizeof(sample);
   }
   return 0;
 }
@@ -312,7 +312,7 @@ void BassDecoder::rewind()
       BASS_ChannelSetPosition((DWORD) _music,0,BASS_MUSIC_POSRESETEX|BASS_MUSIC_POSRESET);
     }
     else 
-      BASS_ChannelSetPosition((DWORD) _music,0,0);
+      BASS_ChannelSetPosition((DWORD) _music,0,BASS_POS_BYTE);
     _ended=false;
   }
 }
@@ -376,7 +376,7 @@ bool BassDecoder::prepareDecode()
 }
 
 bool BassDecoder::decodeID3v2(){
-  const char* tags=BASS_ChannelGetTags((DWORD)_music,(DWORD) BASS_TAG_ID3V2);
+  const char* tags=BASS_ChannelGetTags(_music, BASS_TAG_ID3V2);
   if (tags) {
     unsigned int offset=0;
     offset+= 3 + 2 ; //go to flags
@@ -387,7 +387,7 @@ bool BassDecoder::decodeID3v2(){
 
 bool BassDecoder::decodeID3v1()
 {
-  const char* tags=BASS_ChannelGetTags((DWORD)_music,(DWORD) BASS_TAG_ID3);
+  const char* tags=BASS_ChannelGetTags(_music, BASS_TAG_ID3);
   if (tags) {
     TAG_ID3 *id3=(TAG_ID3*)tags;
     char buf[31]={0};
@@ -404,7 +404,7 @@ bool BassDecoder::decodeID3v1()
 
 
 bool BassDecoder::decodeOGGTag(){
-  const char* tags=BASS_ChannelGetTags((DWORD)_music,(DWORD) BASS_TAG_OGG);
+  const char* tags=BASS_ChannelGetTags(_music, BASS_TAG_OGG);
   if (tags) {
     while (*tags) {
       string_t comment;

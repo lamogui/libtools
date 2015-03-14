@@ -28,7 +28,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * ROLE         : Definie un clone de QSettings pour lire des fichiers ini
   */
 
-#include <libtools/core/settings.hpp>
+#include <libtools/decoders/settings.hpp>
 
 Settings Settings::_instance = Settings();
 

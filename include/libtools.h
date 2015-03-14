@@ -31,7 +31,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * How to use it ?
   *  Simply include libtools dependencies you want use BEFORE libtools.h
   *  Then libtools.h will include all necessary 
-  *  Current usable dependencies are : - SFML 2.X (Graphics)
+  *  Current usable dependencies are : - SFML 2.X custom [https://github.com/lamogui/SFML]
   *                                    - Bass
   *                                    - Bassflac
   *                                    - Bassasio
@@ -48,10 +48,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 ///C++ API
 #if !defined(LIBTOOLS_DLL) || defined(LIBTOOLS_DLL_IMPLEMENT) 
 
-//core (no external dependencies)
+//core (all primary interfaces)
 #include <libtools/core/variant.hpp>
 #include <libtools/core/file.hpp>
-#include <libtools/core/settings.hpp>
 #include <libtools/core/signal.hpp>
 #include <libtools/core/circularpurger.hpp>
 #include <libtools/core/visualsignal.hpp>
@@ -63,22 +62,24 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/core/audiostream.hpp>
 #include <libtools/core/audiodriver.hpp>
 #include <libtools/core/decoder.hpp>
+#include <libtools/core/production.hpp>
 #include <libtools/core/peak.hpp>
 #include <libtools/core/tempo.hpp>
 #include <libtools/core/music.hpp>
 
 
-//drivers
+//decoders (may use external lib)
+#include <libtools/decoders/settings.hpp>
+
+//drivers (use external library to implement interfaces)
 #if defined(LIBTOOLS_WINDOWS)
   #include <libtools/drivers/winmm.hpp>
 #endif
 #if defined(BASS_H) || defined(LIBTOOLS_WINDOWS)
   #include <libtools/drivers/bass.hpp>
 #endif
-#if defined(SFML_AUDIO_HPP)
-  #include <libtools/drivers/sfmlaudio.hpp>
-#endif
 
+///the following are specifics tools to use with a framework
 //sfml (graphical tools) not available on public dll
 #if defined(SFML_GRAPHICS_HPP) && !defined(LIBTOOLS_DLL)
 #include <libtools/sfml/glslrender.hpp>
@@ -89,6 +90,10 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/sfml/scope.hpp>
 #endif
 
+#if defined(QT_VERSION)
+//qt stuff
+#endif
+
 #endif
 //public (dll public symbols)
 #include <libtools/public/singleinstance.hpp>
@@ -97,10 +102,10 @@ extern "C" {
 #endif
 
 ///C API
-//core
+//core 
 #include <libtools/core/file.h>
 
-//drivers
+//drivers 
 #include <libtools/drivers/bassproc.h>
 
 //shaders

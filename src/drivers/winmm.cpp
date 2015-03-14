@@ -31,7 +31,7 @@ AND RENUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   */
 
 #include <libtools/drivers/winmm.hpp>
-#include <libtools/core/settings.hpp>
+#include <libtools/decoders/settings.hpp>
 
 #define MULTIPLIER_16 0.8*32768
 
@@ -194,7 +194,7 @@ bool WinmmDriver::pushStereoSignal(const Signal& left,const Signal& right)
   return true;
 } 
 
-void CALLBACK WinmmDriver::_waveOutProc(HWAVEOUT, UINT uMsg, DWORD dwInstance, DWORD, DWORD)
+void CALLBACK WinmmDriver::_waveOutProc(HWAVEOUT, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR, DWORD_PTR)
 {
   WinmmDriver* a = (WinmmDriver*)dwInstance;
   if(uMsg != WOM_DONE)

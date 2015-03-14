@@ -102,7 +102,7 @@ class LIBTOOLS_PRIVATE BassDecoder : public Decoder
     bool decodeOGGTag();
   
   
-    HANDLE _music;
+    DWORD _music;
     bool _mod;
     bool _ended;
     BASS_CHANNELINFO _infos;

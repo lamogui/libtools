@@ -121,6 +121,7 @@ typedef std::string string_t;
 #define string_t_size(str) str.size()
 #define string_t_to_std(str) str
 #define string_t_empty(str) str.empty()
+#error No support for C++11 version yet
 #endif 
 
 //mutex_t 
