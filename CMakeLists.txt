@@ -1,4 +1,4 @@
-
+﻿
 cmake_minimum_required(VERSION 3.1.3)
 project(libtools)
 
@@ -52,7 +52,7 @@ file(GLOB h_public "include/libtools/public/*")
 #h_drivers
 file (GLOB h_drivers "include/libtools/drivers/*")
 #h_decoders
-file (GLOB h_drivers "include/libtools/decoders/*")
+file (GLOB h_decoders "include/libtools/decoders/*")
 #all includes
 file (GLOB h_shaders "include/libtools/shaders/*")
 #src groups

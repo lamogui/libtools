@@ -40,6 +40,16 @@ extern "C" {
 #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
 #include <windows.h>
 
+#if (_MSC_VER == 1500)
+#ifndef BASSDEF
+#define BASSDEF(f) (WINAPI f)
+#endif
+
+#ifndef BASSFLACDEF
+#define BASSFLACDEF(f) (WINAPI f)
+#endif
+
+#else 
 #ifndef BASSDEF
 #define BASSDEF WINAPI
 #endif
@@ -47,7 +57,7 @@ extern "C" {
 #ifndef BASSFLACDEF
 #define BASSFLACDEF WINAPI
 #endif
-
+#endif
 
 typedef DWORD HMUSIC;		// MOD music handle
 typedef DWORD HSAMPLE;		// sample handle
@@ -107,6 +117,23 @@ typedef struct {
 	HSAMPLE sample; // sample
 	const char *filename; // filename
 } BASS_CHANNELINFO;
+
+typedef struct {
+  DWORD flags;	// device capabilities (DSCAPS_xxx flags)
+  DWORD hwsize;	// size of total device hardware memory
+  DWORD hwfree;	// size of free device hardware memory
+  DWORD freesam;	// number of free sample slots in the hardware
+  DWORD free3d;	// number of free 3D sample slots in the hardware
+  DWORD minrate;	// min sample rate supported by the hardware
+  DWORD maxrate;	// max sample rate supported by the hardware
+  BOOL eax;		// device supports EAX? (always FALSE if BASS_DEVICE_3D was not used)
+  DWORD minbuf;	// recommended minimum buffer length in ms (requires BASS_DEVICE_LATENCY)
+  DWORD dsver;	// DirectSound version
+  DWORD latency;	// delay (in ms) before start of playback (requires BASS_DEVICE_LATENCY)
+  DWORD initflags; // BASS_Init "flags" parameter
+  DWORD speakers; // number of speakers available
+  DWORD freq;		// current output rate
+} BASS_INFO;
 
 typedef unsigned __int64 QWORD;
 
@@ -284,7 +311,9 @@ int load_bassflac_procs(const char* bassflacdllname);
 
 #endif //LIBTOOLS_WINDOWS
 
-
+int BASS_EnsureBassInit(int device, DWORD freq, DWORD flags);
+int BASS_EnsureBassContext();
+void BASS_EnsureBassFree();
 
 #if defined(LIBTOOLS_WINDOWS) && !defined(BASSASIO_H)
 
