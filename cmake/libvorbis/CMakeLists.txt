@@ -125,7 +125,14 @@ install(
 install(DIRECTORY include/vorbis/ DESTINATION include/vorbis/)
 
 
-
+if (MSVC) 
+  foreach (MODE "_DEBUG" "_MINSIZEREL" "_RELEASE" "_RELWITHDEBINFO")
+            string(REPLACE "/MD" "/MT" TMP "${CMAKE_C_FLAGS${MODE}}")
+            set(CMAKE_C_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
+            string(REPLACE "/MD" "/MT" TMP "${CMAKE_CXX_FLAGS${MODE}}")
+            set(CMAKE_CXX_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
+  endforeach (MODE) 
+endif()
   
   
   

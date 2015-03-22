@@ -32,6 +32,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 OggVorbisFileDecoder::OggVorbisFileDecoder():
   _file(NULL),
+  _data(NULL),
+  _dataindex(0),
+  _datasize(0),
   _current_bitstream(0),
   _opened(false),
   _ended(true)
@@ -47,6 +50,7 @@ OggVorbisFileDecoder::~OggVorbisFileDecoder()
 
 bool OggVorbisFileDecoder::_open(const string_t& filename)
 {
+  _reset();
    _file=fopen(string_t_to_std(filename).c_str(),"rb");
    if (!_file)
    {
@@ -78,6 +82,9 @@ void OggVorbisFileDecoder::_reset()
   _resetCallbacks();
   _opened=false;
   _ended=true;
+  _data=NULL;
+  _datasize=0;
+  _dataindex=0;
 
 }
 
@@ -224,7 +231,8 @@ double OggVorbisFileDecoder::length()
   {
     return 0;
   }
-  return ov_time_total(&_vf,-1);
+  double t=ov_time_total(&_vf,-1);
+  return t;
 }
 
 void OggVorbisFileDecoder::rewind()
@@ -234,4 +242,88 @@ void OggVorbisFileDecoder::rewind()
   {
     std::cerr << "OggVorbisFileDecoder error: cannot seek" << std::endl;
   }
+}
+
+bool OggVorbisFileDecoder::load(const uint8_t* data, unsigned int size)
+{
+  _reset();
+  _data=data;
+  _datasize=size;
+  if (!_data)
+  {
+    return false;
+  }
+
+  _callbacks.close_func=NULL;
+  _callbacks.read_func=&OggVorbisFileDecoder::_read_func;
+  _callbacks.seek_func=&OggVorbisFileDecoder::_seek_func;
+  _callbacks.tell_func=&OggVorbisFileDecoder::_tell_func;
+  if (ov_test_callbacks((void*)this,&_vf,NULL,0,_callbacks) ||
+      ov_test_open(&_vf) ||
+      !_checkInfos())
+  {
+    _reset();
+    return false;
+  }
+
+  _parseComments();
+  _opened=true;
+  return true;
+}
+
+size_t OggVorbisFileDecoder::_read_func(void* ptr, size_t size, size_t nmeb, void* datasource)
+{
+  OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
+  size_t cpy_size=size*nmeb;
+  if ( decoder->_dataindex >= decoder->_datasize)
+  {
+    return 0;
+  }
+  if (cpy_size > decoder->_datasize - decoder->_dataindex)
+  {
+    cpy_size=decoder->_datasize - decoder->_dataindex;
+  }
+  memcpy(ptr,(void*)&(decoder->_data[decoder->_dataindex]),cpy_size);
+  decoder->_dataindex+=cpy_size;
+  return cpy_size;
+}
+
+int OggVorbisFileDecoder::_seek_func(void *datasource, ogg_int64_t offset, int whence)
+{
+  OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
+  switch (whence)
+  {
+    case SEEK_SET:
+      if (offset > 0 && offset < decoder->_datasize)
+      {
+        decoder->_dataindex=offset;
+        return 0;
+      }
+      break;
+    case SEEK_CUR:
+      if ((ogg_int64_t)decoder->_dataindex + offset <= (ogg_int64_t)decoder->_datasize &&
+          (ogg_int64_t)decoder->_dataindex + offset >= (ogg_int64_t)0)
+      {
+        decoder->_dataindex+=offset;
+        return 0;
+      }
+      break;
+    case SEEK_END:
+      if ((ogg_int64_t)decoder->_datasize + offset <= (ogg_int64_t)decoder->_datasize &&
+          (ogg_int64_t)decoder->_datasize + offset >= (ogg_int64_t)0)
+      {
+        decoder->_dataindex+=decoder->_datasize + offset;
+        return 0;
+      }
+      break;
+    default:
+      break;
+  }
+  return -1;
+}
+
+long OggVorbisFileDecoder::_tell_func(void *datasource)
+{
+  OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
+  return decoder->_dataindex;
 }

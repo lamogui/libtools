@@ -62,6 +62,8 @@ class OggVorbisFileDecoder : public Decoder
 
     bool parseComment(const string_t& field, const string_t &value);
 
+    bool load(const uint8_t *data, unsigned int size);
+
   protected:
     virtual bool _open(const string_t& filename);
 
@@ -72,11 +74,19 @@ class OggVorbisFileDecoder : public Decoder
     void _resetCallbacks();
 
 
+    static size_t _read_func(void* ptr, size_t size, size_t nmeb, void* datasource);
+    static int _seek_func(void *datasource, ogg_int64_t offset, int whence);
+    static long _tell_func(void *datasource);
+
     std::vector<sample> _buffer;
     ov_callbacks _callbacks;
     OggVorbis_File _vf;
     vorbis_info _infos;
     FILE* _file;
+    const uint8_t* _data;
+    unsigned int _dataindex;
+    unsigned int _datasize;
+
     int _current_bitstream;
     bool _opened;
     bool _ended;
