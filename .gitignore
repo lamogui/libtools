@@ -9,6 +9,7 @@ build/
 build_gcc/
 build_vs11/
 
-
+*.swp
+*.user
 
 
