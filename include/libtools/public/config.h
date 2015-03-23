@@ -113,6 +113,7 @@ typedef sf::String string_t;
 #define string_t_to_stdw(str) str.toWideString()
 #define string_t_empty(str) str.isEmpty()
 #define string_t_w_available
+#define STRING_T_IS_SF_STRING
 #else
 #include <string>
 typedef std::string string_t;

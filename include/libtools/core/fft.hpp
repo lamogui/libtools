@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
@@ -82,13 +82,7 @@ class LIBTOOLS_PRIVATE FFT
     //Compute module if needed !
     void computeModule();
     
-    
-    
     float bass();
-/*#if defined(SFML_GRAPHICS_HPP)     
-    sf::Texture texture;
-    inline unsigned int getTextureOffset() { return _texOffset;}
-#endif */  
   private:
     sample* _input; //Real input buffer;
     sample* _window;

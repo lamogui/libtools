@@ -100,6 +100,54 @@ int load_bassflac_procs(const char* bassflacdllname)
 
 #endif //defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
 
+static int bass_initialized=0;
+
+int BASS_EnsureBassInit(int device, DWORD freq, DWORD flags)
+{
+#if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
+  if (!BASS_Init) {
+    return 0;
+  }
+#endif
+
+  if (!bass_initialized)
+  {
+    if (!BASS_Init(device,freq,flags,0,0)){
+    } else {
+      bass_initialized=1;
+    }
+  } else {
+    //TODO
+    /*BASS_INFO infos;
+    if ((BASS_GetDevice()==device || device==-1) &&
+        BASS_GetInfo(&infos) && infos.freq==freq)
+    {
+
+    } else {*/
+      BASS_EnsureBassFree();
+      return BASS_EnsureBassInit(device,freq,flags);
+    //}
+  }
+  return bass_initialized;
+}
+
+int BASS_EnsureBassContext()
+{
+  return bass_initialized;
+}
+
+
+void BASS_EnsureBassFree()
+{
+  if (bass_initialized) {
+#if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
+    if (BASS_Free)
+#endif
+      BASS_Free();
+    bass_initialized=0;
+  }
+}
+
 #if defined(LIBTOOLS_WINDOWS) && !defined(BASSASIO_H)
 
 BASS_ASIO_GETDEVICEINFO_PROC* BASS_ASIO_GetDeviceInfo=0;

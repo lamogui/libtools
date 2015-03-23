@@ -41,7 +41,7 @@ void Decoder::_namereset() {
 }
 
 
-//#if defined(SFML_STRING_HPP) 
+//#if defined(STRING_T_IS_SF_STRING)
 static void remove_useless_spaces_before(string_t& str){
   while (!string_t_empty(str) && (str[0] == ' ' || str[0] == '_'))
     str.erase(0,1);

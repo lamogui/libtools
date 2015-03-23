@@ -105,23 +105,7 @@ _ended(true),
 _bytesFrame(0),
 _samplesForSignals(0)
 {
-#if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
-  if (!BASS_Init) {
-    MessageBoxA(0,"Bass not loaded (forget check BASS_PROC_Init ?)","Error !",MB_OK|MB_ICONERROR);
-    ExitProcess(0xDEAD);
-  }
-#endif
 
-  if (!BASS_Init(0,Signal::frequency,0,0,0))
-  {
-	  std::cerr << "error : " << string_t_to_std(handleBassInitError()) << std::endl;
-#ifdef LIBTOOLS_WINDOWS
-    MessageBoxA(0,string_t_to_std(handleBassInitError()).c_str(),"Error !",MB_OK|MB_ICONERROR);
-    ExitProcess(0xDEAD);
-#else
-    exit(0xdead);
-#endif
-  }
 }
 
 BassDecoder::~BassDecoder()
@@ -140,11 +124,6 @@ BassDecoder::~BassDecoder()
   }
   if (_samplesForSignals)
     free(_samplesForSignals);
-  
-#if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
-  if (BASS_Free) 
-#endif
-  BASS_Free();
 }
 
 void BassDecoder::reset()

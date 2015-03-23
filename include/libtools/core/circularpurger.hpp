@@ -110,9 +110,16 @@ class circularpurger
       return _vector.data();
     }
     
+#if (_MSC_VER == 1500)
+	inline T* data() {
+      return &(_vector[0]);
+    }
+#else
+
     inline T* data() {
       return _vector.data();
     }
+#endif
     
     inline unsigned int offset() const
     {

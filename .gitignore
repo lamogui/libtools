@@ -13,3 +13,4 @@ build_vs11/
 *.user
 
 
+CMakeLists.txt.user

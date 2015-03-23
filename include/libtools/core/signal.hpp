@@ -1,4 +1,4 @@
-
+﻿
 /*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
@@ -58,9 +58,15 @@ class LIBTOOLS_PRIVATE Signal
     void scale(sample scale);
     void constant(sample constant);
     void saturate(sample min, sample max);
-    sample energy();
-    inline double power() {
-      return energy()/(sample)Signal::size;
+    double energy() const;
+    double fenergy(double f) const;
+
+    inline double power() const {
+      return energy()/(double)Signal::size;
+    }
+
+    inline double fpower(double f) const {
+      return fenergy(f)/(double)Signal::size;
     }
 
     sample level();

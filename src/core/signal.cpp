@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
@@ -173,15 +173,29 @@ void Signal::saturate(sample min, sample max)
   }
 }
 
-sample Signal::energy()
+double Signal::energy() const
 {
-  sample energy=0;
+  double energy=0;
   const unsigned int size = Signal::size;
   for (unsigned int i=0; i < size;i++)
   {
     energy += samples[i]*samples[i];
   }
   return energy;
+}
+
+double Signal::fenergy(double f) const
+{
+  double real=0.0;
+  double im=0.0;
+  const unsigned int size = Signal::size;
+  const double rate=Signal::frequency;
+  for (unsigned int i=0; i < size;i++)
+  {
+    real+=cos(2.0*3.14159265359*f*(double)i/rate)*samples[i];
+    im-=sin(2.0*3.14159265359*f*(double)i/rate)*samples[i];
+  }
+  return sqrt(real*real + im*im);
 }
 
 void Signal::tfd(Signal& out_tfd)
