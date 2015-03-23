@@ -149,7 +149,7 @@ unsigned int WinmmDriver::getBufferedSamplesCount()
 {
 
   EnterCriticalSection(&_waveCriticalSection); //Mutex Locking
-  unsigned int r=_waveFreeBlockCount*Signal::size*2;
+  unsigned int r=(_nbBlocks - _waveFreeBlockCount)*Signal::size;
   LeaveCriticalSection(&_waveCriticalSection);
   return r;
 }

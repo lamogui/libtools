@@ -62,6 +62,7 @@ class LIBTOOLS_PUBLIC AudioDriver : public noncopyable_c
     virtual bool pushStereoSignal(const Signal& left,const Signal& right)=0; 
     
     //Return not yet played samples (at least an estimation > than the reality)
+    //It is not related to the number of channel
     virtual unsigned int getBufferedSamplesCount()=0;
     
     
