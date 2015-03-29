@@ -58,6 +58,11 @@ class NEWindow : public sf::RenderWindow
 
     
     
+    inline void setTitleCharacterSize(unsigned int s)
+    {
+      _title.setCharacterSize(s);
+    }
+    
     //NEWindow NEVER clean or deletes interfaces registred
     //Order Up to Down
     inline void registerInterface(Interface& i) {

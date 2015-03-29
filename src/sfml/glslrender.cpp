@@ -35,6 +35,7 @@ GLSLRender::GLSLRender():
 _rectangle(sf::Vector2f(1.f,1.f))
 {
   _rectangle.setOrigin(sf::Vector2f(.5f,.5f));
+  _rectangle.setFillColor(sf::Color(255,255,255,0));
 }
 
 GLSLRender::~GLSLRender()

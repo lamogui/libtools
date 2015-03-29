@@ -211,6 +211,7 @@ bool BassDecoder::_open(const string_t& filename)
     
     if (prepareDecode()) {
       decodeID3v1();
+      decodeOGGTag();
     }
     
   }
@@ -381,15 +382,36 @@ bool BassDecoder::decodeID3v1()
 }
 
 
+#include <libtools/decoders/oggvorbisfiledecoder.hpp>
 
 bool BassDecoder::decodeOGGTag(){
-  const char* tags=BASS_ChannelGetTags(_music, BASS_TAG_OGG);
+  char* tags=const_cast<char*>(BASS_ChannelGetTags(_music, BASS_TAG_OGG));
+  string_t field;
+  string_t value;
   if (tags) {
     while (*tags) {
-      string_t comment;
-#if defined(SFML_STRING_HPP) 
-  
+      unsigned int size=strlen(tags);
+      if (OggVorbisFileDecoder::splitComment(tags,size,field,value))
+      {
+#ifdef STRING_T_IS_SF_STRING
+        sf::String::Iterator it;
+        for (it=field.begin(); it !=field.end(); it++)
+        {
+          *it=toupper(*it);
+        }
 #endif
+        if (field==string_t("TITLE"))
+        {
+          setName(value);
+          return true;
+        }
+        else if (field==string_t("ARTIST"))
+        {
+          setAuthor(value);
+          return true;
+        }
+      }
+      tags+=strlen(tags)+1;
     }
   }
   return false;

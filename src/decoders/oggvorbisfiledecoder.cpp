@@ -176,6 +176,7 @@ bool OggVorbisFileDecoder::_checkInfos()
     _infos=*infos; //Make a copy
     return true;
   }
+  std::cerr << "OggVorbisFileDecoder error: cannot get stream infos from file" << std::endl;
   return false;
 }
 
@@ -199,7 +200,7 @@ unsigned int OggVorbisFileDecoder::fetch(Signal& outleft, Signal& outright)
 
       if(readed <=0 ) { //EOF or ERROR
         _ended=true;
-        return 0;
+        return total_readed;
       }
       total_readed+=readed;
       request_size-=readed;
@@ -241,6 +242,9 @@ void OggVorbisFileDecoder::rewind()
   if (ov_pcm_seek(&_vf,0))
   {
     std::cerr << "OggVorbisFileDecoder error: cannot seek" << std::endl;
+  } else
+  {
+    _ended=false;
   }
 }
 
@@ -251,23 +255,32 @@ bool OggVorbisFileDecoder::load(const uint8_t* data, unsigned int size)
   _datasize=size;
   if (!_data)
   {
+#ifndef NDEBUG
+    std::cerr << "OggVorbisFileDecoder error: unable to load from null ptr" << std::endl;
+#endif
     return false;
   }
+  _opened=true;
 
   _callbacks.close_func=NULL;
   _callbacks.read_func=&OggVorbisFileDecoder::_read_func;
   _callbacks.seek_func=&OggVorbisFileDecoder::_seek_func;
   _callbacks.tell_func=&OggVorbisFileDecoder::_tell_func;
-  if (ov_test_callbacks((void*)this,&_vf,NULL,0,_callbacks) ||
-      ov_test_open(&_vf) ||
+  int ovtc_result=ov_test_callbacks((void*)this,&_vf,NULL,0,_callbacks);
+  int ovto_result=ov_test_open(&_vf);
+  if (ovtc_result ||
+      ovto_result ||
       !_checkInfos())
   {
     _reset();
+#ifndef NDEBUG
+    std::cerr << "OggVorbisFileDecoder error: ov_test_callbacks " << ovtc_result << " ov_test_open " << ovto_result << std::endl;
+#endif
     return false;
   }
 
   _parseComments();
-  _opened=true;
+  _ended=false;
   return true;
 }
 
@@ -275,32 +288,40 @@ size_t OggVorbisFileDecoder::_read_func(void* ptr, size_t size, size_t nmeb, voi
 {
   OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
   size_t cpy_size=size*nmeb;
+  //std::cerr << "_read_func " << datasource << " decoder->_dataindex " << decoder->_dataindex << " decoder->_datasize "  << decoder->_datasize << std::endl;
+  //std::cerr << "request " << cpy_size << " size " << size << " nmeb " << nmeb << std::endl;
   if ( decoder->_dataindex >= decoder->_datasize)
   {
     return 0;
   }
   if (cpy_size > decoder->_datasize - decoder->_dataindex)
   {
+    //std::cerr << "correcting cpy_size " << decoder->_datasize - decoder->_dataindex << std::endl;
     cpy_size=decoder->_datasize - decoder->_dataindex;
   }
   memcpy(ptr,(void*)&(decoder->_data[decoder->_dataindex]),cpy_size);
+
   decoder->_dataindex+=cpy_size;
+  //std::cerr << "end _read_func " << datasource << " decoder->_dataindex " << decoder->_dataindex << " decoder->_datasize "  << decoder->_datasize << std::endl;
   return cpy_size;
 }
 
 int OggVorbisFileDecoder::_seek_func(void *datasource, ogg_int64_t offset, int whence)
 {
   OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
+  //std::cerr << "_seek_func " << datasource << " decoder->_dataindex " << decoder->_dataindex << " decoder->_datasize "  << decoder->_datasize << std::endl;
   switch (whence)
   {
     case SEEK_SET:
-      if (offset > 0 && offset < decoder->_datasize)
+      //std::cerr << "SEEK_SET" << "offset " << offset << std::endl;
+      if (offset >= 0 && offset < decoder->_datasize)
       {
         decoder->_dataindex=offset;
         return 0;
       }
       break;
     case SEEK_CUR:
+      //std::cerr << "SEEK_CUR" << "offset " << offset << std::endl;
       if ((ogg_int64_t)decoder->_dataindex + offset <= (ogg_int64_t)decoder->_datasize &&
           (ogg_int64_t)decoder->_dataindex + offset >= (ogg_int64_t)0)
       {
@@ -309,10 +330,11 @@ int OggVorbisFileDecoder::_seek_func(void *datasource, ogg_int64_t offset, int w
       }
       break;
     case SEEK_END:
+      //std::cerr << "SEEK_END" << "offset " << offset << std::endl;
       if ((ogg_int64_t)decoder->_datasize + offset <= (ogg_int64_t)decoder->_datasize &&
           (ogg_int64_t)decoder->_datasize + offset >= (ogg_int64_t)0)
       {
-        decoder->_dataindex+=decoder->_datasize + offset;
+        decoder->_dataindex=decoder->_datasize + offset;
         return 0;
       }
       break;
@@ -325,5 +347,6 @@ int OggVorbisFileDecoder::_seek_func(void *datasource, ogg_int64_t offset, int w
 long OggVorbisFileDecoder::_tell_func(void *datasource)
 {
   OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
+  //std::cerr << "_tell_func " << datasource << " decoder->_dataindex " << decoder->_dataindex << " decoder->_datasize "  << decoder->_datasize << std::endl;
   return decoder->_dataindex;
 }
