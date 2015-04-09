@@ -1,4 +1,4 @@
-
+﻿
 
 /*
 
@@ -560,5 +560,16 @@ void NEWindow::registerClass()
   }
 
 }
+
+void NEWindow::forwardMessages()
+{
+  MSG message;
+  while (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
+  {
+    TranslateMessage(&message);
+    DispatchMessage(&message);
+  }
+}
+
 
 #endif

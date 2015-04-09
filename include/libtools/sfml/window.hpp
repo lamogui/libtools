@@ -1,4 +1,4 @@
-
+﻿
 
 /*
 
@@ -152,6 +152,8 @@ class NEWindow : public sf::RenderWindow
     //Files dropped
     std::queue<string_t> filesDropped;
 
+
+
 #ifdef LIBTOOLS_WINDOWS
     static bool hasUnicodeSupport();
     static LRESULT CALLBACK lamoguiWinProc(HWND hwnd,
@@ -159,6 +161,7 @@ class NEWindow : public sf::RenderWindow
                                   WPARAM wParam,
                                   LPARAM lParam);
     static void registerClass();
+    static void forwardMessages();
   protected:
     static std::map<HWND,NEWindow*> _wins;
 #endif
