@@ -2,6 +2,17 @@
 cmake_minimum_required(VERSION 3.1.3)
 project(libtools)
 
+
+# define a macro that helps defining an option
+macro(libtools_set_option var default type docstring)
+    if(NOT DEFINED ${var})
+        set(${var} ${default})
+    endif()
+    set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
+endmacro()
+
+libtools_set_option(LIB_INSTALL_DIR lib STRING "The lib destination dir (lib, lib32 or lib64)")
+
 # option(SFML_AUDIO_DRIVER "Build with SFML-AUDIO Driver support" OFF)
 
 # if (SFML_AUDIO_DRIVER)
@@ -23,8 +34,8 @@ include_directories(
 
 option(BUILD_SFML2_IMPLEMENTATION "Build with SFML 2.X support" ON)
 option(BUILD_STL_2011_IMPLEMENTATION "Build with STL C++ 2011 support" ON)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/${LIB_INSTALL_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/${LIB_INSTALL_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 add_definitions(-DSFML_STATIC)
 
@@ -93,7 +104,7 @@ if (BUILD_SFML2_IMPLEMENTATION)
   set_target_properties( tools-sfml PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
   set_target_properties( tools-sfml PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
   set_target_properties( tools-sfml PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
-  INSTALL(TARGETS tools-sfml DESTINATION lib/)
+  INSTALL(TARGETS tools-sfml DESTINATION ${LIB_INSTALL_DIR}/)
 endif()
 
 if (BUILD_STL_2011_IMPLEMENTATION)
@@ -122,7 +133,7 @@ if (BUILD_STL_2011_IMPLEMENTATION)
   set_target_properties(tools-c++11 PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
   set_target_properties(tools-c++11 PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
   set_target_properties(tools-c++11 PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
-  INSTALL(TARGETS tools-sfml DESTINATION lib/)
+  INSTALL(TARGETS tools-sfml DESTINATION ${LIB_INSTALL_DIR}/)
 endif()
 
 if (MSVC) 
