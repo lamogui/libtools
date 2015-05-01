@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
@@ -262,7 +262,7 @@ void FFT::compute(const sample* s, unsigned int size) {
 void FFT::computeModule() {
   if (_real && _imaginary) {
     //static float maxi=0;
-    for (unsigned int i=0; i<_size>>1; i++) {
+    for (unsigned int i=0; i<_size/2; i++) {
       //From wikipedia http://en.wikipedia.org/wiki/Discrete_Fourier_transform
       //x2 pour la symétrie
       _module[i]=(sample)2.0*sqrt((_real[i]*_real[i] + _imaginary[i]*_imaginary[i]))/(float)_size;

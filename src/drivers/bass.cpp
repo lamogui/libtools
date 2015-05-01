@@ -1,4 +1,4 @@
-
+ï»¿
 /*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
@@ -20,7 +20,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * THIS FILE IS PART OF LIBTOOLS 
   * SECURITY LEVEL : 8 (CRITICAL)  
   * VISIBILITY     : PRIVATE
-  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
+  *  COPYDOWN LAMOGUI ALL RIGHTS RESERVED
   *
   * FILE         : bass.hpp
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
@@ -321,7 +321,7 @@ unsigned int BassDecoder::frames()
   return 0;
 }
 
-double BassDecoder::length() {
+double BassDecoder::length() const {
   #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
   if (!BASS_ChannelGetLength || 
       !BASS_ChannelBytes2Seconds || 

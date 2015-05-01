@@ -98,7 +98,14 @@ class NEWindow : public sf::RenderWindow
     inline void removeInterfaces() {
       _interfaces.clear();
     }
-    
+
+#ifdef LIBTOOLS_WINDOWS
+  void setZPosition(HWND insert_after);
+  void setTransparency(uint8_t alpha);
+  void setMaskColor(const sf::Color& ref);
+#endif
+
+
   protected:
     ///Paramètres de la fenêtre
     //Tailles des bordures

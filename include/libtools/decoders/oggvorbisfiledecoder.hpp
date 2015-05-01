@@ -46,13 +46,13 @@ class OggVorbisFileDecoder : public Decoder
 
     virtual unsigned int fetch(Signal& outleft, Signal& outright);
 
-    inline virtual bool ended()
+    inline virtual bool ended() const
     {
       return _ended;
     }
 
     virtual void rewind();
-    virtual double length();
+    virtual double length() const;
 
     static bool splitComment(
         const char *comment,
@@ -80,7 +80,7 @@ class OggVorbisFileDecoder : public Decoder
 
     std::vector<sample> _buffer;
     ov_callbacks _callbacks;
-    OggVorbis_File _vf;
+    mutable OggVorbis_File _vf;
     vorbis_info _infos;
     FILE* _file;
     const uint8_t* _data;

@@ -458,9 +458,125 @@ void NEWindow::setBackgroundTexture(const std::string& name,
 }
 
 
-extern void panic();
 
 #ifdef LIBTOOLS_WINDOWS
+
+void NEWindow::setZPosition(HWND insert_after)
+{
+  SetWindowPos(this->getSystemHandle(), insert_after, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+}
+
+void NEWindow::setTransparency(uint8_t alpha)
+{
+  COLORREF previous_colorref=0;
+  DWORD previous_styleflag;
+  DWORD previous_layerflag=0;
+  HWND hWnd=this->getSystemHandle();
+
+  GetLayeredWindowAttributes(hWnd,&previous_colorref,NULL,&previous_layerflag);
+  bool unicode=hasUnicodeSupport();
+  if (unicode)
+  {
+    previous_styleflag=GetWindowLongW(hWnd,GWL_EXSTYLE);
+  }
+  else
+  {
+    previous_styleflag=GetWindowLongA(hWnd, GWL_EXSTYLE);
+  }
+
+  if (alpha==255 && !previous_layerflag)
+  {
+    if (unicode)
+    {
+      SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
+    }
+    else
+    {
+      SetWindowLongA(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
+    }
+  }
+  else
+  {
+    if (previous_styleflag & GWL_EXSTYLE == 0)
+    {
+      if (unicode)
+      {
+        SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
+      }
+      else
+      {
+        SetWindowLongA(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
+      }
+    }
+    SetLayeredWindowAttributes(hWnd,
+                               previous_colorref,
+                               alpha,
+                               previous_layerflag | LWA_ALPHA);
+  }
+}
+
+
+void NEWindow::setMaskColor(const sf::Color& ref)
+{
+  bool desactivate=ref.a!=255;
+  COLORREF colorref=RGB(ref.r,ref.g,ref.b);
+  DWORD previous_styleflag;
+  DWORD previous_layerflag=0;
+  BYTE previous_alpha=0;
+  HWND hWnd=this->getSystemHandle();
+
+  GetLayeredWindowAttributes(hWnd,NULL,&previous_alpha,&previous_layerflag);
+  bool unicode=hasUnicodeSupport();
+  if (unicode)
+  {
+    previous_styleflag=GetWindowLongW(hWnd,GWL_EXSTYLE);
+  }
+  else
+  {
+    previous_styleflag=GetWindowLongA(hWnd, GWL_EXSTYLE);
+  }
+
+  if (desactivate && !previous_layerflag)
+  {
+    if (unicode)
+    {
+      SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
+    }
+    else
+    {
+      SetWindowLongA(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
+    }
+  }
+  else
+  {
+    if (previous_styleflag & GWL_EXSTYLE == 0)
+    {
+      if (unicode)
+      {
+        SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
+      }
+      else
+      {
+        SetWindowLongA(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
+      }
+    }
+    if (desactivate)
+    {
+      SetLayeredWindowAttributes(hWnd,
+                                 0,
+                                 previous_alpha,
+                                 previous_layerflag & ~LWA_COLORKEY);
+    }
+    else
+    {
+      SetLayeredWindowAttributes(hWnd,
+                                 colorref,
+                                 previous_alpha,
+                                 previous_layerflag | LWA_COLORKEY);
+    }
+  }
+}
+
 bool NEWindow::hasUnicodeSupport()
 {
     OSVERSIONINFO version;
@@ -571,5 +687,4 @@ void NEWindow::forwardMessages()
   }
 }
 
-
-#endif
+#endif //LIBTOOLS_WINDOW

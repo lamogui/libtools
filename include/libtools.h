@@ -79,6 +79,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #if defined(BASS_H) || defined(LIBTOOLS_WINDOWS)
   #include <libtools/drivers/bass.hpp>
 #endif
+#include <libtools/drivers/4klang.hpp>
 
 ///the following are specifics tools to use with a framework
 //sfml (graphical tools) not available on public dll

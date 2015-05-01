@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
@@ -16,43 +16,12 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 */
 
 /**
-  * THIS FILE IS PART OF LIBTOOLS 
-  * SECURITY LEVEL : 8 (CRITICAL)  
-  * VISIBILITY     : PROTECTED
-  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
+  * THIS FILE IS PART OF 
+  * SECURITY LEVEL :   
+  * VISIBILITY     : 
+  * Â© COPYDOWNâ„¢ LAMOGUI ALL RIGHTS RESERVED 
   *
-  * FILE         : shaders.h
+  * FILE         : 
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
-  * VERSION      : V1.0 olol
-  * DEPENDENCIES : config.h
-  * ROLE         : Quelques shaders
+  * VERSION      : 
   */
-  
-#ifndef LIBTOOLS_SHADERS_H
-#define LIBTOOLS_SHADERS_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif 
- 
-//Signal
-extern const char* lightsaber_signal_fs_src;
-extern const char* classic_signal_fs_src;
-
-//flux
-extern const char* classic_flux_fs_src;
-extern const char* classic_cardio_flux_fs_src;
-
-//FFT
-extern const char* vls_fft_fs_src;
-extern const char* vls_log_fft_fs_src;
-extern const char* shadertoy_fft_fs_src;
-
-//Vertex
-extern const char* v_vs_src;
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif

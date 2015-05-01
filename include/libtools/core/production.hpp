@@ -67,9 +67,9 @@ class MusicProduction : public Production, public AbstractStereoSignalSource
     virtual Production::GenreId genre()=0;    
     virtual unsigned int fetch(Signal& outleft, Signal& outright) = 0;
     
-    virtual bool ended() = 0; //can fetch ?
+    virtual bool ended() const = 0; //can fetch ?
     virtual void rewind() = 0; //restart the production
-    virtual double length() = 0; //Length of the music in seconds
+    virtual double length() const = 0; //Length of the music in seconds
   
 };
 

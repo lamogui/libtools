@@ -1,4 +1,4 @@
-
+﻿
 /*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
@@ -81,10 +81,10 @@ class LIBTOOLS_PRIVATE BassDecoder : public Decoder
     BassDecoder();
     virtual ~BassDecoder();
 
-    inline virtual bool ended() {return _ended;}
+    inline virtual bool ended() const {return _ended;}
     virtual void rewind();
     unsigned int frames();
-    virtual double length();
+    virtual double length() const;
     
     void reset();
     

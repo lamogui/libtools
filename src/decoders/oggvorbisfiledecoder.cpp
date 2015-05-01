@@ -226,7 +226,7 @@ unsigned int OggVorbisFileDecoder::fetch(Signal& outleft, Signal& outright)
   return 0;
 }
 
-double OggVorbisFileDecoder::length()
+double OggVorbisFileDecoder::length() const
 {
   if (!_opened)
   {
