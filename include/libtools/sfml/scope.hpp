@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
@@ -105,7 +105,13 @@ class VisualSignalInterface : public Interface
     void setColor(int rouge,int ver,int bleu, int jaune);
     void addRender(GLSLRender& render,float size);
 
+
+    virtual void setViewSize(float x, float y);
+
   private:
+
+    void _setupRendered();
+
     VisualSignal* _visual;
     sf::Text _text;
     sf::RectangleShape _noise;
@@ -116,6 +122,8 @@ class VisualSignalInterface : public Interface
     sf::RectangleShape _vert;
     sf::RectangleShape _bleu;
     sf::RectangleShape _jaune;
+
+    std::vector<std::pair<GLSLRender*, float> > _renders;
 
 };
 
@@ -145,7 +153,10 @@ class DeLoorPiano  : public Interface
       return _keyboard;
     }
 
+    virtual void setViewSize(float x, float y);
+
   private:
+    void setupGraphics();
 
     void _realupdate();
 

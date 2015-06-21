@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
@@ -241,7 +241,7 @@ void ScopeA::setFadeColor(const sf::Color& colorInit, const sf::Color& colorEnd,
 
 
 VisualSignalInterface::VisualSignalInterface(const sf::Vector2f& size,const sf::Font& font):
-Interface(sf::Vector2u(600,100),size),
+Interface(sf::Vector2u(size.x,100),size),
 _visual(0),
 _text("",font,11)
 {
@@ -321,11 +321,30 @@ void VisualSignalInterface::update()
 
 void VisualSignalInterface::addRender(GLSLRender& render,float size)
 {
-  render.setPosition(sf::Vector2f(256.f+size*0.5f,50));
+  //render.setPosition(sf::Vector2f(256.f+size*0.5f,50));
   render.setScale(sf::Vector2f(size,-100.f));
+  //render.setOrigin(sf::Vector2f(1.f,0.5f));
+  _renders.push_back(std::pair<GLSLRender*,float>(&render,size));
+  _setupRendered();
   addDrawable(&render);
 }
 
+void VisualSignalInterface::setViewSize(float x, float y)
+{
+  unsigned int ix=x;
+  if (ix < 350) ix=350;
+  _internalZoneChanged(sf::Vector2u(ix, 100));
+  Interface::setViewSize(x,y);
+  _setupRendered();
+}
+
+void VisualSignalInterface::_setupRendered()
+{
+ for (unsigned int i=0;i<_renders.size();i++)
+ {
+   _renders.at(i).first->setPosition(sf::Vector2f(_zone.x-_renders.at(i).second*.5f,50));
+ }
+}
 
 void DeLoorPiano::setKeyboard(bool k)
 {
@@ -355,7 +374,7 @@ void DeLoorPiano::setKeyboard(bool k)
 }
 
 DeLoorPiano::DeLoorPiano(const sf::Vector2f& size, const sf::Font& font ) :
-  Interface(sf::Vector2u(Signal::size,100),size),
+  Interface(sf::Vector2u(size.x,100),size),
   _manager(0),
   _table(0),
   _precomupter(0),
@@ -364,29 +383,9 @@ DeLoorPiano::DeLoorPiano(const sf::Vector2f& size, const sf::Font& font ) :
   _keyboard(false)
 {
   _modeButton.setCallback(this,&DeLoorPiano::setKeyboard, &DeLoorPiano::isKeyboard);
-  _modeButton.setPosition(Signal::size-65,5.f);
   addMouseCatcher(&_modeButton);
 
-  for (unsigned int i=0; i < NB_NOTES; i++) {
-     _bars[i].setRotation(180);
-     _bars[i].setPosition((float)i*(float)Signal::size/(float)NB_NOTES,85);
-  }
-  
-  const unsigned int dpos=Signal::size/52;
-  unsigned int pos=dpos;
-  for (unsigned int i=0; i < NB_NOTES; i++) {
-     _keys[i].setRotation(180);
-     if (Note::isBlack(i)) {
-      _keys[i].setPosition(pos-dpos/2,55);
-      _keys[i].setSize(sf::Vector2f(dpos-2,50));
-      _keys[i].setFillColor(sf::Color(0,0,0,255));
-     } else {
-      _keys[i].setPosition(pos,85);
-      _keys[i].setSize(sf::Vector2f(dpos-2,80));
-      pos+=dpos;
-     }
-  }
-
+  setupGraphics();
   setKeyboard(_keyboard);
   _progress.setPosition(0,85);
 }
@@ -412,7 +411,7 @@ void DeLoorPiano::update()
 
         float height = 15.f*cos(4.f*i/(float)NB_NOTES + _precomupter->progress()/500.f);
         height += 10.f*sin(16.f*i/(float)NB_NOTES + _precomupter->progress()/200.f) * cos(_precomupter->progress()/1500.f);
-        _bars[i].setSize(sf::Vector2f(Signal::size/(float)NB_NOTES - 2.f,height + 60.f));
+        _bars[i].setSize(sf::Vector2f(_zone.x/(float)NB_NOTES - 2.f,height + 60.f));
       }
       for (unsigned int i=p; i < NB_NOTES; i++) {
         _bars[i].setSize(sf::Vector2f(0,0));
@@ -427,7 +426,7 @@ void DeLoorPiano::update()
     if (_manager)
       _realupdate();
     for (unsigned int i=0; i < NB_NOTES; i++) {
-      _bars[i].setSize(sf::Vector2f(Signal::size/(float)NB_NOTES - 2.f,_table[i]*80));
+      _bars[i].setSize(sf::Vector2f(_zone.x/(float)NB_NOTES - 2.f,_table[i]*80));
     }
   }
   else {
@@ -577,3 +576,35 @@ void DeLoorPiano::_realupdate()
 }
 
 */
+
+
+void DeLoorPiano::setViewSize(float x, float y)
+{
+  _internalZoneChanged((sf::Vector2u(x,100)));
+  Interface::setViewSize(x,y);
+  setupGraphics();
+}
+
+void DeLoorPiano::setupGraphics()
+{
+  _modeButton.setPosition(_zone.x-65,5.f);
+  for (unsigned int i=0; i < NB_NOTES; i++) {
+     _bars[i].setRotation(180);
+     _bars[i].setPosition((float)i*(float)_zone.x/(float)NB_NOTES,85);
+  }
+
+  const float dpos=_zone.x/52.f;
+  float pos=dpos;
+  for (unsigned int i=0; i < NB_NOTES; i++) {
+     _keys[i].setRotation(180);
+     if (Note::isBlack(i)) {
+      _keys[i].setPosition(pos-dpos/2.f,55);
+      _keys[i].setSize(sf::Vector2f(dpos-2.f,50));
+      _keys[i].setFillColor(sf::Color(0,0,0,255));
+     } else {
+      _keys[i].setPosition(pos,85);
+      _keys[i].setSize(sf::Vector2f(dpos-2.f,80));
+      pos+=dpos;
+     }
+  }
+}

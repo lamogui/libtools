@@ -387,14 +387,14 @@ void NEWindow::arrange() {
       float y1=1.f-(float)idealSize.y/(float)_clientSize.y;
       for (unsigned int i=0;i<_interfaces.size();i++)
       {
-        float sfac=1.f;//_clientSize.y/(float)idealSize.y;
-        _interfaces[i]->setViewSize(_clientSize.x/sfac,_interfaces[i]->getIdealSize().y);
-        float y2 = sfac*_interfaces[i]->getIdealSize().y/(float)_clientSize.y;
-        _interfaces[i]->setViewport(sf::FloatRect(_viewportMin.x,
-                                        _viewportMin.y+y1*_viewportMax.y,
-                                        _viewportMax.x,
-                                        y2*_viewportMax.y));
-        y1+=y2;
+          float sfac=1.f;//_clientSize.y/(float)idealSize.y;
+          _interfaces[i]->setViewSize(_clientSize.x/sfac,_interfaces[i]->getIdealSize().y);
+          float y2 = sfac*_interfaces[i]->getIdealSize().y/(float)_clientSize.y;
+          _interfaces[i]->setViewport(sf::FloatRect(_viewportMin.x,
+                                     _viewportMin.y+y1*_viewportMax.y,
+                                     _viewportMax.x,
+                                     y2*_viewportMax.y));
+          y1+=y2;
       }
     }
     else //on alloue proportionellement à la place dispo
@@ -497,7 +497,7 @@ void NEWindow::setTransparency(uint8_t alpha)
   }
   else
   {
-    if (previous_styleflag & GWL_EXSTYLE == 0)
+    if ((previous_styleflag & WS_EX_LAYERED) == 0)
     {
       if (unicode)
       {
@@ -549,7 +549,7 @@ void NEWindow::setMaskColor(const sf::Color& ref)
   }
   else
   {
-    if (previous_styleflag & GWL_EXSTYLE == 0)
+    if (previous_styleflag & WS_EX_LAYERED == 0)
     {
       if (unicode)
       {
@@ -573,6 +573,7 @@ void NEWindow::setMaskColor(const sf::Color& ref)
                                  colorref,
                                  previous_alpha,
                                  previous_layerflag | LWA_COLORKEY);
+      std::cout<<"setLayerATtribut" << std::endl;
     }
   }
 }
