@@ -123,14 +123,15 @@ _cleanExit(false)
 
     HWND hWnd=0;
     // Create the window
-    if (hasUnicodeSupport())
+    //if (hasUnicodeSupport())
     {
         hWnd = CreateWindowExW(WS_EX_ACCEPTFILES,L"NEWin98", title.toWideString().c_str(), win32Style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), 0);
     }
-    else
+    /*else
     {
         hWnd = CreateWindowExA(WS_EX_ACCEPTFILES,"NEWin98", title.toAnsiString().c_str(), win32Style, left, top, width, height, NULL, NULL, GetModuleHandle(NULL), 0);
-    }
+    }*/
+    NEWindow::_wins.insert(std::pair<HWND,NEWindow*>(hWnd,this)); //[hWnd]=this;
 
     create(hWnd,settings);
 
@@ -138,7 +139,8 @@ _cleanExit(false)
     // we have to resize it after creation to apply the real size
     setSize(sf::Vector2u(mode.width, mode.height));
 
-    _wins[getSystemHandle()]=this;
+    assert(hWnd==getSystemHandle());
+
 
 #endif
 
@@ -164,10 +166,7 @@ void NEWindow::destroy()
 #ifdef LIBTOOLS_WINDOWS
   _cleanExit=true;
   _wins.erase(save);
-  if (hasUnicodeSupport())
-  {
-    DestroyWindow(save); //Effective destroy
-  }
+  DestroyWindow(save); //Effective destroy
 #endif
 }
 
@@ -178,7 +177,50 @@ void NEWindow::onCreate()
 
 void NEWindow::onResize()
 {
-  arrange();
+  sf::Vector2u newSize(getSize());
+
+  bool valid=true;
+  if (newSize.x > _maxSize.x)
+  {
+     newSize.x = _maxSize.x;
+     valid=false;
+  }
+  else if (newSize.x < _minSize.x)
+  {
+     newSize.x=_minSize.x;
+     valid=false;
+  }
+  if (newSize.y > _maxSize.y)
+  {
+     newSize.y = _maxSize.y;
+     valid=false;
+  }
+  else if (newSize.y < _minSize.y)
+  {
+     newSize.y=_minSize.y;
+     valid=false;
+  }
+  if (valid)
+  {
+    arrange();
+  }
+  else
+  {
+    setSize(newSize);
+  }
+}
+
+
+void NEWindow::setMinSize(const sf::Vector2u size)
+{
+   _minSize=size;
+   onResize();
+}
+
+void NEWindow::setMaxSize(const sf::Vector2u size)
+{
+   _maxSize=size;
+   onResize();
 }
 
 bool NEWindow::useEvent(const sf::Event& event)
@@ -313,11 +355,26 @@ bool NEWindow::useEvent(const sf::Event& event)
           {
             sf::Vector2u newSize(mousePosition.x-_previousMousePos.x + _previousWinSize.x,
                                  mousePosition.y-_previousMousePos.y + _previousWinSize.y);
-            if (newSize.x > _maxSize.x) newSize.x = _maxSize.x;
-            else if (newSize.x < _minSize.x) newSize.x=_minSize.x;
-            if (newSize.y > _maxSize.y) newSize.y = _maxSize.y;
-            else if (newSize.y < _minSize.y) newSize.y=_minSize.y;
+
+
+            if (newSize.x > _maxSize.x)
+            {
+               newSize.x = _maxSize.x;
+            }
+            else if (newSize.x < _minSize.x)
+            {
+               newSize.x=_minSize.x;
+            }
+            if (newSize.y > _maxSize.y)
+            {
+               newSize.y = _maxSize.y;
+            }
+            else if (newSize.y < _minSize.y)
+            {
+               newSize.y=_minSize.y;
+            }
             setSize(newSize);
+
           }
         }
 #endif
@@ -614,10 +671,13 @@ bool NEWindow::hasUnicodeSupport()
 
 LRESULT CALLBACK NEWindow::lamoguiWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
-  NEWindow* win=NEWindow::_wins[hwnd];
-  if (uMsg==WM_DROPFILES)
-   {
-    //MessageBoxA(0,"Drop receive","debug",MB_OK);
+  std::map<HWND,NEWindow*>::iterator it=NEWindow::_wins.find(hwnd);
+  if (it != NEWindow::_wins.end())
+  {
+    NEWindow* win=it->second;
+    if (uMsg==WM_DROPFILES)
+    {
+      //MessageBoxA(0,"Drop receive","debug",MB_OK);
       HDROP hDropInfo = (HDROP) wParam;
       const unsigned int files = DragQueryFileW(hDropInfo,0xFFFFFFFF,0,0);
       if (files)
@@ -629,40 +689,41 @@ LRESULT CALLBACK NEWindow::lamoguiWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPAR
         string_t s = filename;
            win->filesDropped.push(s);
         }
-      return TRUE;
+        return TRUE;
+      }
+      return FALSE;
      }
-    return FALSE;
-   }
-   else if (uMsg==WM_COPYDATA)
-   {
-
-      COPYDATASTRUCT* cds = (COPYDATASTRUCT*) lParam;
-      char* c= (char*)cds->lpData;
-      string_t current;
-      unsigned int i=0;
-      while (*c && i < cds->cbData) {
-        if (*c == ';')
-        {
-          win->filesDropped.push(current);
-          current="";
-        }
-        else
-          current+=*c;
+     else if (uMsg==WM_COPYDATA)
+     {
+       COPYDATASTRUCT* cds = (COPYDATASTRUCT*) lParam;
+       char* c= (char*)cds->lpData;
+       string_t current;
+       unsigned int i=0;
+       while (*c && i < cds->cbData) {
+       if (*c == ';')
+       {
+         win->filesDropped.push(current);
+         current="";
+       }
+       else current+=*c;
         c++;
         i++;
-      }
+       }
       /*debug << "Received " << cds->cbData  << " bytes" <<  std::endl;
       debug << "Received " << (char*)cds->lpData <<  std::endl;*/
       return TRUE;
+     }
    }
-   static const bool hasUnicode = hasUnicodeSupport();
+   return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+
+   /*static const bool hasUnicode = hasUnicodeSupport();
    return hasUnicode ? DefWindowProcW(hwnd, uMsg, wParam, lParam) :
-                       DefWindowProcA(hwnd, uMsg, wParam, lParam);
+                       DefWindowProcA(hwnd, uMsg, wParam, lParam);*/
 }
 
 void NEWindow::registerClass()
 {
-  if (hasUnicodeSupport())
+  //if (hasUnicodeSupport())
   {
         WNDCLASSW windowClass;
         windowClass.style         = 0;
@@ -677,7 +738,7 @@ void NEWindow::registerClass()
         windowClass.lpszClassName = L"NEWin98";
         RegisterClassW(&windowClass);
    }
-  else
+  /*else
   {
       WNDCLASSA windowClass;
       windowClass.style         = 0;
@@ -691,7 +752,7 @@ void NEWindow::registerClass()
       windowClass.lpszMenuName  = NULL;
       windowClass.lpszClassName ="NEWin98";
       RegisterClassA(&windowClass);
-  }
+  }*/
 
 }
 

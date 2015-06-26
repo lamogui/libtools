@@ -106,7 +106,16 @@ class NEWindow : public sf::RenderWindow
 #endif
 
     void destroy();
+    void setMinSize(const sf::Vector2u size);
+    void setMaxSize(const sf::Vector2u size);
 
+    const sf::Vector2u& maxSize() const {
+      return _maxSize;
+    }
+
+    const sf::Vector2u& minSize() const{
+      return _minSize;
+    }
 
   protected:
 
