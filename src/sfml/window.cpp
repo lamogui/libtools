@@ -2,26 +2,26 @@
 
 /*
 
-THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
+THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN.
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
 THIS LICENSE HEADER. A SECURITY LEVEL IS ASSIGNED TO THE FILE AND A VISIBILITY.
-THIS FILE MUST NOT BE COPIED OR REDISTRIBUTED IF IT'S VISIBILITY IS NOT PUBLIC. 
+THIS FILE MUST NOT BE COPIED OR REDISTRIBUTED IF IT'S VISIBILITY IS NOT PUBLIC.
 VISIBILITY HAS 3 POSSIBLE STATES:
 - PRIVATE: LIMITED TO PROJECTS WITH THE SAME SECURITY LEVEL WITHIN THE BDE NE777. (DEFAULT VISIBILITY)
-- PROTECTED: LIMITED TO PROJECTS USING THE SAME SECURITY RULES WITHIN THE BDE NE777. 
-- PUBLIC: USABLE FOR FREE IN PUBLIC PROJECTS UNDER THE FOLLOWING LICENSES: BSD, MIT OR DWTFYWT 
-WITHOUT OTHER CONDITIONS THAN THE CONSERVATION OF THIS HEADER INCLUDING: 
+- PROTECTED: LIMITED TO PROJECTS USING THE SAME SECURITY RULES WITHIN THE BDE NE777.
+- PUBLIC: USABLE FOR FREE IN PUBLIC PROJECTS UNDER THE FOLLOWING LICENSES: BSD, MIT OR DWTFYWT
+WITHOUT OTHER CONDITIONS THAN THE CONSERVATION OF THIS HEADER INCLUDING:
 RULES, ORIGINAL AUTHORS (WITH EMAIL), ORIGINAL FILENAME, AND VERSION, INSIDE THE FILE
-WHICH CONTAINS PART (OR ENTIRE) CODE FROM THIS FILE. USABLE IN OTHER PROJECTS WITH CONDITIONS 
+WHICH CONTAINS PART (OR ENTIRE) CODE FROM THIS FILE. USABLE IN OTHER PROJECTS WITH CONDITIONS
 AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 */
 
 /**
-  * THIS FILE IS PART OF LIBTOOLS 
-  * SECURITY LEVEL : 8 (CRITICAL)  
+  * THIS FILE IS PART OF LIBTOOLS
+  * SECURITY LEVEL : 8 (CRITICAL)
   * VISIBILITY     : PRIVATE
-  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
+  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED
   *
   * FILE         : window.cpp
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
@@ -38,6 +38,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 #include <iostream>
 #include <libtools/sfml/window.hpp>
+#include <assert.h>
 
 #ifdef LIBTOOLS_WINDOWS
 #include <windows.h>
@@ -45,7 +46,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 std::map<HWND,NEWindow*> NEWindow::_wins;
 #endif
 
-NEWindow::NEWindow(sf::VideoMode mode, 
+NEWindow::NEWindow(sf::VideoMode mode,
                    const sf::String& title,
                    const sf::Font& font,
                    const sf::ContextSettings& settings) :
@@ -55,6 +56,8 @@ sf::RenderWindow(),
 #else
 sf::RenderWindow(mode,title,sf::Style::Default,settings),
 #endif
+_maxSize(-1,-1),
+_minSize(400,200),
 _borderSizeUp(40),
 _borderSizeDown(20),
 _borderSizeRight(20),
@@ -78,10 +81,11 @@ _currentMouseCatcher(NULL),
 _fullView(sf::FloatRect(0,0,mode.width,mode.height)),
 _backSprite(),
 _backTexture(),
-_backCenter(0,0)         
+_backCenter(0,0),
+_cleanExit(false)
 {
 #ifdef LIBTOOLS_WINDOWS
-  
+
 
   //Close Button params
   _closeButton.linkTo(&_onClose,ButtonMode::on);
@@ -89,7 +93,7 @@ _backCenter(0,0)
   _closeButton.setClickedColor(sf::Color(142,42,42,255));
   _closeButton.setIdleColor(sf::Color(100,42,42,255));
 
-  
+
   //ResizeTriangle
   _resizeTriangle.setPointCount(3);
   _resizeTriangle.setPoint(0, sf::Vector2f(15, 0));
@@ -100,7 +104,7 @@ _backCenter(0,0)
 
   registerMouseCatcher(_closeButton);
 
-  
+
     // Compute position and size
     HDC screenDC = GetDC(NULL);
     int left   = (GetDeviceCaps(screenDC, HORZRES) - static_cast<int>(mode.width))  / 2;
@@ -137,20 +141,44 @@ _backCenter(0,0)
     _wins[getSystemHandle()]=this;
 
 #endif
- 
+
   arrange();
-  
-  
+
+
 }
 
 NEWindow::~NEWindow(){
- 
-  /*#ifdef LIBTOOLS_WINDOWS
-  sf::WindowHandle save = getSystemHandle();
-  close();
+  #ifdef LIBTOOLS_WINDOWS
+  assert(_cleanExit);
+  #endif
+}
+
+void NEWindow::destroy()
+{
+#ifdef LIBTOOLS_WINDOWS
+  HWND save = getSystemHandle();
+#endif
+
+  close(); //Destroy SFML window
+
+#ifdef LIBTOOLS_WINDOWS
+  _cleanExit=true;
   _wins.erase(save);
-  DestroyWindow(save);
-  #endif*/
+  if (hasUnicodeSupport())
+  {
+    DestroyWindow(save); //Effective destroy
+  }
+#endif
+}
+
+void NEWindow::onCreate()
+{
+
+}
+
+void NEWindow::onResize()
+{
+  arrange();
 }
 
 bool NEWindow::useEvent(const sf::Event& event)
@@ -158,21 +186,15 @@ bool NEWindow::useEvent(const sf::Event& event)
   switch (event.type)
   {
     case sf::Event::Closed: {
-      sf::WindowHandle save = getSystemHandle();
       close();
-#ifdef LIBTOOLS_WINDOWS
-      _wins.erase(save);
-      DestroyWindow(save);
-#endif
       return true;
                             }
     case sf::Event::Resized:
-      arrange();
       return true;
-      
+
     ///Gestion de la capture de la souris pour les Mouse Catchers
     case sf::Event::MouseButtonPressed:
-      if (event.mouseButton.button == sf::Mouse::Left) 
+      if (event.mouseButton.button == sf::Mouse::Left)
       {
         const sf::Vector2i mousePosition(event.mouseButton.x,
                                          event.mouseButton.y);
@@ -188,9 +210,9 @@ bool NEWindow::useEvent(const sf::Event& event)
                                       getSize().x,
                                       getSize().y
                                       )) continue;
-          
+
             sf::Vector2f v = mapPixelToCoords(mousePosition,
-                                              _interfaces[i]->getView()); 
+                                              _interfaces[i]->getView());
             if ((_currentMouseCatcher = _interfaces[i]->onMousePress(v.x,v.y)))
             {
               _currentInterfaceCatcher = _interfaces[i];
@@ -198,7 +220,7 @@ bool NEWindow::useEvent(const sf::Event& event)
             }
           }
         }
-        sf::Vector2f v = mapPixelToCoords(mousePosition,_fullView); 
+        sf::Vector2f v = mapPixelToCoords(mousePosition,_fullView);
         if (!_currentMouseCatcher) //ensuite élèments de la fenetre
         {
           for (unsigned int i =0; i < _mouseCatchers.size(); i++)
@@ -214,12 +236,12 @@ bool NEWindow::useEvent(const sf::Event& event)
 #ifdef LIBTOOLS_WINDOWS
         if (!_currentMouseCatcher) //enfins éléments spéciaux
         {
-          if (mousePosition.x > getSize().x - _borderSizeRight && 
+          if (mousePosition.x > getSize().x - _borderSizeRight &&
               mousePosition.y > getSize().y - _borderSizeDown)
           {
             _onResizeWin=true;
             _resizeTriangle.setFillColor(sf::Color(142,142,142,255));
-            
+
           }
           else
             _onMoveWin=true;
@@ -236,14 +258,14 @@ bool NEWindow::useEvent(const sf::Event& event)
         if (_currentMouseCatcher && _currentInterfaceCatcher)
         {
           sf::Vector2f v = mapPixelToCoords(mousePosition,
-                                       _currentInterfaceCatcher->getView()); 
+                                       _currentInterfaceCatcher->getView());
           _currentMouseCatcher->onMouseRelease(v.x,v.y);
           _currentMouseCatcher=NULL;
           _currentInterfaceCatcher=NULL;
         }
         else if (_currentMouseCatcher)
         {
-          sf::Vector2f v = mapPixelToCoords(mousePosition,_fullView); 
+          sf::Vector2f v = mapPixelToCoords(mousePosition,_fullView);
           _currentMouseCatcher->onMouseRelease(v.x,v.y);
           _currentMouseCatcher=NULL;
           _currentInterfaceCatcher=NULL;
@@ -276,7 +298,7 @@ bool NEWindow::useEvent(const sf::Event& event)
         }
         else if (_currentMouseCatcher)
         {
-          sf::Vector2f v = mapPixelToCoords(mousePosition,_fullView); 
+          sf::Vector2f v = mapPixelToCoords(mousePosition,_fullView);
           _currentMouseCatcher->onMouseMove(v.x,v.y);
         }
 #ifdef LIBTOOLS_WINDOWS
@@ -291,10 +313,11 @@ bool NEWindow::useEvent(const sf::Event& event)
           {
             sf::Vector2u newSize(mousePosition.x-_previousMousePos.x + _previousWinSize.x,
                                  mousePosition.y-_previousMousePos.y + _previousWinSize.y);
-            if (newSize.x < 400) newSize.x = 400;
-            if (newSize.y < 200) newSize.y = 200;
+            if (newSize.x > _maxSize.x) newSize.x = _maxSize.x;
+            else if (newSize.x < _minSize.x) newSize.x=_minSize.x;
+            if (newSize.y > _maxSize.y) newSize.y = _maxSize.y;
+            else if (newSize.y < _minSize.y) newSize.y=_minSize.y;
             setSize(newSize);
-            arrange();
           }
         }
 #endif
@@ -302,36 +325,30 @@ bool NEWindow::useEvent(const sf::Event& event)
         checkInterrupt();
         return true;
       }
-      
+
     case sf::Event::KeyPressed:
       break;
     case sf::Event::KeyReleased:
       if (event.key.code == sf::Keyboard::Escape)
       {
-          sf::WindowHandle save = getSystemHandle();
-          close();
-#ifdef LIBTOOLS_WINDOWS
-          _wins.erase(save);
-          DestroyWindow(save);
-#endif
-          return true;
-
+         close();
+         return true;
       }
       break;
     default:
       break;
   }
-  
+
   return false;
 }
 
 void NEWindow::arrange() {
   _title.setPosition(_borderSizeLeft,5.f);
-  
+
   _clientSize.x=getSize().x-_borderSizeLeft-_borderSizeRight;
   _clientSize.y=getSize().y-_borderSizeUp-_borderSizeDown;
   _fullView = sf::View(sf::FloatRect(0,0,getSize().x,getSize().y));
-  
+
   _viewportMin.x=_borderSizeLeft/(float)getSize().x;
   _viewportMin.y=_borderSizeUp/(float)getSize().y;
   _viewportMax.x=_clientSize.x/(float)getSize().x;
@@ -345,12 +362,12 @@ void NEWindow::arrange() {
    _backSprite.setPosition(-(int)_backCenter.x+(int)_backCenter.x*(int)getSize().x/((int)_backTexture.getSize().x+1),
                            (int)_backCenter.y*(int)getSize().y/(float)(_backTexture.getSize().y+1)-(int)_backCenter.y);
 
-  // Toute la place est disponible 
+  // Toute la place est disponible
   sf::Vector2u idealSize(0,0);
   for (unsigned int k=0;k<_interfaces.size();k++)
     idealSize+=_interfaces[k]->getIdealSize();
-  
-  if (0) { //Cas zoom automatique
+
+  /*if (0) { //Cas zoom automatique
     if (_clientSize.y >= idealSize.y) //Plus de place que necessaire
     {
       float y1=0;
@@ -381,7 +398,7 @@ void NEWindow::arrange() {
         y1+=y2;
       }
     }
-  } else { //Cas pas de zoom et on commence en bas
+  } else */{ //Cas pas de zoom et on commence en bas
     if (_clientSize.y >= idealSize.y) //Plus de place que necessaire
     {
       float y1=1.f-(float)idealSize.y/(float)_clientSize.y;
@@ -427,7 +444,7 @@ void NEWindow::drawContent()
   {
     draw(*(_mouseCatchers[i]));
   }
-  
+
   //On dessine Les interfaces
   for (unsigned int i =0; i < _interfaces.size(); i++)
   {
@@ -599,26 +616,26 @@ LRESULT CALLBACK NEWindow::lamoguiWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPAR
 {
   NEWindow* win=NEWindow::_wins[hwnd];
   if (uMsg==WM_DROPFILES)
-	{
+   {
     //MessageBoxA(0,"Drop receive","debug",MB_OK);
-		HDROP hDropInfo = (HDROP) wParam;
-		const unsigned int files = DragQueryFileW(hDropInfo,0xFFFFFFFF,0,0);
-		if (files)
-		{
-			for (unsigned int i=0; i < files; i++)
-		  {
-			  WCHAR filename[MAX_PATH];
-			  DragQueryFileW(hDropInfo,i,filename,MAX_PATH);
+      HDROP hDropInfo = (HDROP) wParam;
+      const unsigned int files = DragQueryFileW(hDropInfo,0xFFFFFFFF,0,0);
+      if (files)
+      {
+         for (unsigned int i=0; i < files; i++)
+        {
+           WCHAR filename[MAX_PATH];
+           DragQueryFileW(hDropInfo,i,filename,MAX_PATH);
         string_t s = filename;
-			  win->filesDropped.push(s);
-		  }
+           win->filesDropped.push(s);
+        }
       return TRUE;
-	  }
+     }
     return FALSE;
    }
    else if (uMsg==WM_COPYDATA)
    {
-     
+
       COPYDATASTRUCT* cds = (COPYDATASTRUCT*) lParam;
       char* c= (char*)cds->lpData;
       string_t current;

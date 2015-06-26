@@ -20,7 +20,7 @@ libtools_set_option(LIB_INSTALL_DIR lib STRING "The lib destination dir (lib, li
 # endif()
 
 # SET(IMPLEMENTATION_TYPE "SFML 2.X" CACHE STRING "Library used for implentation")
-# SET_PROPERTY(CACHE IMPLEMENTATION_TYPE PROPERTY STRINGS "SFML 2.X" "STL 2011") 
+# SET_PROPERTY(CACHE IMPLEMENTATION_TYPE PROPERTY STRINGS "SFML 2.X" "STL 2011")
 
 # if ($(IMPLEMENTATION_TYPE) MATCHES "SFML 2.X")
   # add_definitions(-DBUILD_LIBTOOLS_SFML)
@@ -29,7 +29,7 @@ libtools_set_option(LIB_INSTALL_DIR lib STRING "The lib destination dir (lib, li
 # endif()
 
 include_directories(
-  include/
+  BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/include/
 )
 
 option(BUILD_SFML2_IMPLEMENTATION "Build with SFML 2.X support" ON)
@@ -39,7 +39,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_INSTALL_DIR
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_definitions(-DSFML_STATIC)
 
-#defines files 
+#defines files
 #src
 #src_sfml
 file(GLOB src_sfml "src/sfml/*")
@@ -77,9 +77,9 @@ source_group("shaders" FILES  ${src_shaders} ${h_shaders})
 MESSAGE( STATUS "Install location: " ${CMAKE_INSTALL_PREFIX} )
 
 if (BUILD_SFML2_IMPLEMENTATION)
-  add_library( 
+  add_library(
     tools-sfml
-    STATIC 
+    STATIC
     ${src_core}
     ${h_core}
     ${src_drivers}
@@ -108,9 +108,9 @@ if (BUILD_SFML2_IMPLEMENTATION)
 endif()
 
 if (BUILD_STL_2011_IMPLEMENTATION)
-  add_library( 
+  add_library(
     tools-c++11
-    STATIC 
+    STATIC
     ${src_core}
     ${h_core}
     ${src_drivers}
@@ -136,13 +136,13 @@ if (BUILD_STL_2011_IMPLEMENTATION)
   INSTALL(TARGETS tools-sfml DESTINATION ${LIB_INSTALL_DIR}/)
 endif()
 
-if (MSVC) 
+if (MSVC)
   foreach (MODE "_DEBUG" "_MINSIZEREL" "_RELEASE" "_RELWITHDEBINFO")
             string(REPLACE "/MD" "/MT" TMP "${CMAKE_C_FLAGS${MODE}}")
             set(CMAKE_C_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
             string(REPLACE "/MD" "/MT" TMP "${CMAKE_CXX_FLAGS${MODE}}")
             set(CMAKE_CXX_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
-  endforeach (MODE) 
+  endforeach (MODE)
 endif()
 
 INSTALL(DIRECTORY include/ DESTINATION include)

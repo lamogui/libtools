@@ -2,26 +2,26 @@
 
 /*
 
-THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
+THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN.
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
 THIS LICENSE HEADER. A SECURITY LEVEL IS ASSIGNED TO THE FILE AND A VISIBILITY.
-THIS FILE MUST NOT BE COPIED OR REDISTRIBUTED IF IT'S VISIBILITY IS NOT PUBLIC. 
+THIS FILE MUST NOT BE COPIED OR REDISTRIBUTED IF IT'S VISIBILITY IS NOT PUBLIC.
 VISIBILITY HAS 3 POSSIBLE STATES:
 - PRIVATE: LIMITED TO PROJECTS WITH THE SAME SECURITY LEVEL WITHIN THE BDE NE777. (DEFAULT VISIBILITY)
-- PROTECTED: LIMITED TO PROJECTS USING THE SAME SECURITY RULES WITHIN THE BDE NE777. 
-- PUBLIC: USABLE FOR FREE IN PUBLIC PROJECTS UNDER THE FOLLOWING LICENSES: BSD, MIT OR DWTFYWT 
-WITHOUT OTHER CONDITIONS THAN THE CONSERVATION OF THIS HEADER INCLUDING: 
+- PROTECTED: LIMITED TO PROJECTS USING THE SAME SECURITY RULES WITHIN THE BDE NE777.
+- PUBLIC: USABLE FOR FREE IN PUBLIC PROJECTS UNDER THE FOLLOWING LICENSES: BSD, MIT OR DWTFYWT
+WITHOUT OTHER CONDITIONS THAN THE CONSERVATION OF THIS HEADER INCLUDING:
 RULES, ORIGINAL AUTHORS (WITH EMAIL), ORIGINAL FILENAME, AND VERSION, INSIDE THE FILE
-WHICH CONTAINS PART (OR ENTIRE) CODE FROM THIS FILE. USABLE IN OTHER PROJECTS WITH CONDITIONS 
+WHICH CONTAINS PART (OR ENTIRE) CODE FROM THIS FILE. USABLE IN OTHER PROJECTS WITH CONDITIONS
 AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 */
 
 /**
-  * THIS FILE IS PART OF LIBTOOLS 
-  * SECURITY LEVEL : 8 (CRITICAL)  
+  * THIS FILE IS PART OF LIBTOOLS
+  * SECURITY LEVEL : 8 (CRITICAL)
   * VISIBILITY     : PROTECTED
-  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
+  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED
   *
   * FILE         : window.hpp
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
@@ -50,50 +50,50 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 class NEWindow : public sf::RenderWindow
 {
   public:
-    NEWindow(sf::VideoMode mode, 
+    NEWindow(sf::VideoMode mode,
              const sf::String& title,
-             const sf::Font&, 
+             const sf::Font&,
              const sf::ContextSettings& settings = sf::ContextSettings());
     virtual ~NEWindow();
 
-    
-    
+
+
     inline void setTitleCharacterSize(unsigned int s)
     {
       _title.setCharacterSize(s);
     }
-    
+
     //NEWindow NEVER clean or deletes interfaces registred
     //Order Up to Down
     inline void registerInterface(Interface& i) {
       _interfaces.push_back(&i);
     }
-    
-    
+
+
     //NEWindow NEVER clean or deletes MouseCatcher registred
     inline void registerMouseCatcher(MouseCatcher& m) {
       _mouseCatchers.push_back(&m);
-   
+
     }
-    
+
     inline const sf::View getFullView() const {
       return _fullView;
     }
-    
+
     inline const sf::Vector2f& clientSize() const {
       return _clientSize;
     }
-    
+
     void setBackgroundTexture(const std::string& name,
                               const sf::Vector2i center);
-    
-    
+
+
     //Arrange interfaces disposal
-    void arrange(); 
+    void arrange();
     bool useEvent(const sf::Event& event);
-   
+
     bool checkInterrupt();
-   
+
     void drawContent();
     inline void removeInterfaces() {
       _interfaces.clear();
@@ -105,51 +105,61 @@ class NEWindow : public sf::RenderWindow
   void setMaskColor(const sf::Color& ref);
 #endif
 
+    void destroy();
+
 
   protected:
+
+    virtual void onCreate();
+    virtual void onResize();
+
     ///Paramètres de la fenêtre
+    //Taille minimale et maximale de la fenetre
+    sf::Vector2u _maxSize;
+    sf::Vector2u _minSize;
     //Tailles des bordures
     float _borderSizeUp;
     float _borderSizeDown;
     float _borderSizeRight;
     float _borderSizeLeft;
     //Taille alloué pour les interfaces
-    sf::Vector2f _clientSize; 
+    sf::Vector2f _clientSize;
     sf::Vector2f _viewportMin;
     sf::Vector2f _viewportMax;
-    
+
+
     //Variables de gestion de l'état de la fenêtre
     bool _onMoveWin;
     bool _onResizeWin;
     int _onClose;
-    
+
     //previous positions...
     sf::Vector2i _previousWinPos;
     sf::Vector2i _previousMousePos;
     sf::Vector2u _previousWinSize;
-    
-    
+
+
 #ifdef LIBTOOLS_WINDOWS
     //Buttons
     Button _closeButton;
-    
+
     //Resize Triangle
     sf::ConvexShape _resizeTriangle;
-#endif    
+#endif
     //Windows Title
     sf::Text _title;
-    
+
     //Interface manager
     Interface* _currentInterfaceCatcher;
-    std::vector<Interface*> _interfaces; 
-    
+    std::vector<Interface*> _interfaces;
+
     //Mouse Catcher Manager
     MouseCatcher* _currentMouseCatcher;
     std::vector<MouseCatcher*> _mouseCatchers;
-    
+
     //windows FULL VIEW
     sf::View _fullView;
-    
+
     //Background image
     sf::Sprite _backSprite;
     sf::Texture _backTexture;
@@ -171,6 +181,8 @@ class NEWindow : public sf::RenderWindow
     static void forwardMessages();
   protected:
     static std::map<HWND,NEWindow*> _wins;
+  private:
+    bool _cleanExit;
 #endif
 };
 
