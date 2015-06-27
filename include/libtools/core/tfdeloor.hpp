@@ -81,7 +81,7 @@ class LIBTOOLS_PRIVATE TFDeLoorPrecomputer
     TFDeLoorPrecomputer();
     virtual ~TFDeLoorPrecomputer();
 
-    bool start(Decoder* decoder);
+    bool start(MusicDecoder* decoder);
 
     inline sample* getFrame(unsigned int frame) {
       if (frame<_frames && _table)
@@ -125,7 +125,7 @@ class LIBTOOLS_PRIVATE TFDeLoorPrecomputer
     mutex_t _mutex;
     unsigned int _frames;
     unsigned int _progress;
-    Decoder* _decoder;
+    MusicDecoder* _decoder;
     sample* _table;
 
 };

@@ -205,8 +205,9 @@ bool BassDecoder::_open(const string_t& filename)
     BASS_ChannelGetInfo((DWORD)_music,&_infos);
     _bytesFrame= sizeof(float)*Signal::size*_infos.chans;
     _samplesForSignals = (float*) realloc(_samplesForSignals,_bytesFrame);
-    if (_infos.freq != Signal::frequency)
-      std::cout << "warning : file rate (" << _infos.freq << "Hz) is different of " << Signal::frequency << "Hz" << std::endl;
+    _sampleRate=_infos.freq;
+    if (_sampleRate != Signal::frequency)
+      std::cout << "warning : file rate (" << _sampleRate << "Hz) is different of " << Signal::frequency << "Hz" << std::endl;
     _ended=false;
     
     if (prepareDecode()) {
@@ -214,6 +215,57 @@ bool BassDecoder::_open(const string_t& filename)
       decodeOGGTag();
     }
     
+  }
+  #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
+  } else {
+    std::cerr << "Error missing bass fonctions in DLL " << std::endl;
+  }
+  #endif
+  return (_music);
+}
+
+
+
+bool BassDecoder::_load(const uint8_t* buffer, unsigned int size)
+{
+  reset();
+  _mod=false;
+  #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
+  if (BASS_MusicLoad &&
+      BASS_StreamCreateFile &&
+      BASS_ChannelGetInfo)
+  {
+  #endif
+
+  if (_music=BASS_MusicLoad(TRUE,
+                            (void*) buffer, 0,size,
+                            BASS_MUSIC_PRESCAN |
+                            BASS_MUSIC_DECODE |
+                            BASS_SAMPLE_FLOAT,
+                            Signal::frequency))
+  {
+    _mod=true;
+  }
+  else if (_music=BASS_StreamCreateFile(TRUE,
+                                        (void*) buffer, 0, size,
+                                        BASS_STREAM_PRESCAN |
+                                        BASS_STREAM_DECODE |
+                                        BASS_SAMPLE_FLOAT));
+  if (_music)
+  {
+    BASS_ChannelGetInfo((DWORD)_music,&_infos);
+    _bytesFrame= sizeof(float)*Signal::size*_infos.chans;
+    _samplesForSignals = (float*) realloc(_samplesForSignals,_bytesFrame);
+    _sampleRate=_infos.freq;
+    if (_sampleRate != Signal::frequency)
+      std::cout << "warning : file rate (" << _sampleRate << "Hz) is different of " << Signal::frequency << "Hz" << std::endl;
+    _ended=false;
+
+    if (prepareDecode()) {
+      decodeID3v1();
+      decodeOGGTag();
+    }
+
   }
   #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
   } else {

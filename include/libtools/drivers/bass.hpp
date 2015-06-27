@@ -75,7 +75,7 @@ class LIBTOOLS_PRIVATE BassAsioDriver : public AudioDriver
 #if defined(LIBTOOLS_WINDOWS) || defined(BASS_H)
 #include <libtools/core/decoder.hpp>
 
-class LIBTOOLS_PRIVATE BassDecoder : public Decoder
+class LIBTOOLS_PRIVATE BassDecoder : public MusicDecoder
 {
   public:  
     BassDecoder();
@@ -96,6 +96,8 @@ class LIBTOOLS_PRIVATE BassDecoder : public Decoder
     
   protected:
     virtual bool _open(const string_t& filename);
+    virtual bool _load(const uint8_t* buffer, unsigned int size);
+
     bool prepareDecode();
     bool decodeID3v2();
     bool decodeID3v1();

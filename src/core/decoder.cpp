@@ -33,11 +33,12 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   #include <libtools/core/decoder.hpp>
   
   
-void Decoder::_namereset() {
+void MusicDecoder::_infosreset() {
   _filename=string_t();
   _name=string_t();
   _artist=string_t();
   _genre=0;
+  _sampleRate=0;
 }
 
 
@@ -110,8 +111,8 @@ static void remove_file_extension(string_t& str) {
 //#endif
 
 
-bool Decoder::open(const string_t& filename){
-  _namereset();
+bool MusicDecoder::open(const string_t& filename){
+  _infosreset();
   bool r=this->_open(filename);
   if (r) {
     _filename=filename;
@@ -158,23 +159,74 @@ bool Decoder::open(const string_t& filename){
     if (string_t_empty(_artist))
       setAuthor(partist);
   }
-  else _namereset();
+  else _infosreset();
   return r;
 }
 
-void Decoder::setName(const string_t& name){
+bool MusicDecoder::load(const uint8_t* buffer, unsigned int size)
+{
+  _infosreset();
+  return _load(buffer,size);
+}
+
+void MusicDecoder::setName(const string_t& name){
   
   _name=name;
   detect_fucking_warez_ad_tag(_name);
 }
 
-void Decoder::setAuthor(const string_t& artist){
+void MusicDecoder::setAuthor(const string_t& artist){
   
   _artist=artist;
   detect_fucking_warez_ad_tag(_artist);
 }
 
-void Decoder::setGenre(const string_t& genre){
+void MusicDecoder::setGenre(const string_t& genre){
   
 }
 
+bool MusicDecoder::parseComment(
+    const string_t& field,
+    const string_t& value)
+{
+  if (field==string_t("TITLE"))
+  {
+    setName(value);
+    return true;
+  }
+  else if (field==string_t("ARTIST"))
+  {
+    setAuthor(value);
+    return true;
+  }
+  return false;
+}
+
+
+bool MusicDecoder::splitComment(
+    const char* comment,
+    unsigned int size,
+    string_t& field,
+    string_t& value)
+{
+#ifdef STRING_T_IS_SF_STRING
+  sf::String str=sf::String::fromUtf8(comment, &(comment[size]));
+  size_t split=str.find(sf::String("="));
+  if (split==sf::String::InvalidPos){
+    return false;
+  } else {
+    field=str.substring(0,split);
+    value=str.substring(split+1);
+    sf::String::Iterator it;
+    for (it=field.begin(); it !=field.end(); it++)
+    {
+      *it=toupper(*it);
+    }
+
+    //std::cout << "field " << field.toAnsiString() << "=" << value.toAnsiString() << std::endl;
+    return true;
+  }
+#else
+  return false;
+#endif
+}

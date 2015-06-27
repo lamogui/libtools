@@ -44,7 +44,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 class LIBTOOLS_PRIVATE Music 
 {
   public:
-    Music(Decoder& decoder,FFT& fft):
+    Music(MusicDecoder& decoder,FFT& fft):
     _decoder(&decoder),
     _fft(&fft),
     _energyTempo((float)Signal::frequency/(float)Signal::size),
@@ -72,7 +72,7 @@ class LIBTOOLS_PRIVATE Music
     
   protected:
     void _reset();
-    Decoder* _decoder;
+    MusicDecoder* _decoder;
     FFT* _fft;
     
     float _boostTime;

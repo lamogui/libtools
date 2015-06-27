@@ -594,16 +594,22 @@ void DeLoorPiano::setupGraphics()
   }
 
   const float dpos=_zone.x/52.f;
-  float pos=dpos;
+  float pos=0.f;
+  float w_size=dpos*8.f;
+  float b_size=dpos*5.f;
+  if (w_size > 80.f) {
+    w_size=80.f;
+    b_size=50.f;
+  }
+  float y=80.f-w_size;
   for (unsigned int i=0; i < NB_NOTES; i++) {
-     _keys[i].setRotation(180);
      if (Note::isBlack(i)) {
-      _keys[i].setPosition(pos-dpos/2.f,55);
-      _keys[i].setSize(sf::Vector2f(dpos-2.f,50));
+      _keys[i].setPosition(pos-dpos/2.f,y);
+      _keys[i].setSize(sf::Vector2f(dpos-2.f,b_size));
       _keys[i].setFillColor(sf::Color(0,0,0,255));
      } else {
-      _keys[i].setPosition(pos,85);
-      _keys[i].setSize(sf::Vector2f(dpos-2.f,80));
+      _keys[i].setPosition(pos,y);
+      _keys[i].setSize(sf::Vector2f(dpos-2.f,w_size));
       pos+=dpos;
      }
   }

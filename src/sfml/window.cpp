@@ -669,7 +669,7 @@ bool NEWindow::hasUnicodeSupport()
 }
 
 
-LRESULT CALLBACK NEWindow::lamoguiWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+LRESULT CALLBACK NEWindow::neWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
   std::map<HWND,NEWindow*>::iterator it=NEWindow::_wins.find(hwnd);
   if (it != NEWindow::_wins.end())
@@ -682,13 +682,14 @@ LRESULT CALLBACK NEWindow::lamoguiWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPAR
       const unsigned int files = DragQueryFileW(hDropInfo,0xFFFFFFFF,0,0);
       if (files)
       {
-         for (unsigned int i=0; i < files; i++)
+        for (unsigned int i=0; i < files; i++)
         {
            WCHAR filename[MAX_PATH];
-           DragQueryFileW(hDropInfo,i,filename,MAX_PATH);
-        string_t s = filename;
+           unsigned int len=DragQueryFileW(hDropInfo,i,filename,MAX_PATH);
+           string_t s = filename;
            win->filesDropped.push(s);
         }
+        //free((void*)filename);
         return TRUE;
       }
       return FALSE;
@@ -696,22 +697,9 @@ LRESULT CALLBACK NEWindow::lamoguiWinProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPAR
      else if (uMsg==WM_COPYDATA)
      {
        COPYDATASTRUCT* cds = (COPYDATASTRUCT*) lParam;
-       char* c= (char*)cds->lpData;
-       string_t current;
-       unsigned int i=0;
-       while (*c && i < cds->cbData) {
-       if (*c == ';')
-       {
-         win->filesDropped.push(current);
-         current="";
-       }
-       else current+=*c;
-        c++;
-        i++;
-       }
-      /*debug << "Received " << cds->cbData  << " bytes" <<  std::endl;
-      debug << "Received " << (char*)cds->lpData <<  std::endl;*/
-      return TRUE;
+       string_t current = (wchar_t*)cds->lpData;
+       win->filesDropped.push(current);
+       return TRUE;
      }
    }
    return DefWindowProcW(hwnd, uMsg, wParam, lParam);
@@ -727,7 +715,7 @@ void NEWindow::registerClass()
   {
         WNDCLASSW windowClass;
         windowClass.style         = 0;
-        windowClass.lpfnWndProc   = &NEWindow::lamoguiWinProc;
+        windowClass.lpfnWndProc   = &NEWindow::neWinProc;
         windowClass.cbClsExtra    = 0;
         windowClass.cbWndExtra    = 0;
         windowClass.hInstance     = GetModuleHandle(NULL);
@@ -764,6 +752,46 @@ void NEWindow::forwardMessages()
     TranslateMessage(&message);
     DispatchMessage(&message);
   }
+}
+
+
+bool NEWindow::sendFilepathsW(const wchar_t* win_name , int argc, wchar_t **argv)
+{
+  HWND win = FindWindowW(L"NEWin98", win_name);
+  if (win) {
+    SetForegroundWindow(win);
+
+    // Command line is not empty. Send the
+    // command line in a WM_COPYDATA message.
+    if (argc > 1) {
+      for (unsigned int i=1; i < argc;i++){
+        COPYDATASTRUCT cds;
+        size_t len=wcslen(argv[i]);
+        cds.cbData = (len+1)*sizeof(wchar_t);
+        wchar_t* data=(wchar_t*) malloc(cds.cbData);
+        memcpy((void*) data, argv[i], cds.cbData);
+        cds.lpData = (void*) data;
+        SendMessageA(
+              win, WM_COPYDATA, 0, (LPARAM)&cds);
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+
+void NEWindow::setCurrentDirToExecutablePath()
+{
+  HMODULE hModule = GetModuleHandleW(NULL);
+  WCHAR path[MAX_PATH];
+  GetModuleFileNameW(hModule, path, MAX_PATH);
+  unsigned int k=0;
+  while (path[k++]);
+  unsigned int i=k-1;
+  while (i && path[i] != L'/' && path[i] != L'\\')
+     path[i--]=0;
+  SetCurrentDirectoryW(path);
 }
 
 #endif //LIBTOOLS_WINDOW

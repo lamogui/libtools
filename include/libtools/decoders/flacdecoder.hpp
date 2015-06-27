@@ -21,13 +21,13 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * VISIBILITY     : PROTECTED
   * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED
   *
-  * FILE         : oggvorbisfiledecoder.hpp
+  * FILE         : flacdecoder.hpp
   * AUTHORS      : Julien De Loor (julien.deloor@gmail.com)
   * VERSION      : 1.0
   */
 
-#ifndef LIBTOOLS_OGGVORBISFILEDECODER_HPP
-#define LIBTOOLS_OGGVORBISFILEDECODER_HPP
+#ifndef LIBTOOLS_FLACDECODER_HPP
+#define LIBTOOLS_FLACDECODER_HPP
 
 #include <libtools/public/config.h>
 #include <libtools/core/decoder.hpp>
@@ -35,14 +35,13 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
+#include <FLAC/stream_decoder.h>
 
-class OggVorbisFileDecoder : public MusicDecoder
+class FlacDecoder : public MusicDecoder
 {
   public:
-    OggVorbisFileDecoder();
-    virtual ~OggVorbisFileDecoder();
+    FlacDecoder();
+    virtual ~FlacDecoder();
 
     virtual unsigned int fetch(Signal& outleft, Signal& outright);
 
@@ -54,36 +53,49 @@ class OggVorbisFileDecoder : public MusicDecoder
     virtual void rewind();
     virtual double length() const;
 
-    bool parseComment(const string_t& field, const string_t &value);
+    bool load(const uint8_t *data, unsigned int size);
 
 
   protected:
     virtual bool _open(const string_t& filename);
-    virtual bool _load(const uint8_t *data, unsigned int size);
+    virtual bool _load(const uint8_t* buffer, unsigned int size);
 
   private:
-    bool _checkInfos();
-    void _parseComments();
     void _reset();
-    void _resetCallbacks();
 
 
-    static size_t _read_func(void* ptr, size_t size, size_t nmeb, void* datasource);
-    static int _seek_func(void *datasource, ogg_int64_t offset, int whence);
-    static long _tell_func(void *datasource);
+    static FLAC__StreamDecoderWriteStatus _write_callback(
+        const FLAC__StreamDecoder* decoder,
+        const FLAC__Frame* frame,
+        const FLAC__int32* const buffer[],
+        void* client_data);
 
-    ov_callbacks _callbacks;
-    mutable OggVorbis_File _vf;
-    vorbis_info _infos;
+    static void _metadata_callback(const FLAC__StreamDecoder* decoder,
+                                   const FLAC__StreamMetadata* metadata,
+                                   void* client_data);
+    static void _error_callback(const FLAC__StreamDecoder* decoder,
+                                FLAC__StreamDecoderErrorStatus status,
+                                void* client_data);
+
+
+    //Flac struct
+    FLAC__StreamDecoder* _streamdecoder;
+
+    //File
     FILE* _file;
+
+    //Buffering from char*
     const uint8_t* _data;
     unsigned int _dataindex;
     unsigned int _datasize;
 
-    int _current_bitstream;
+    //Playing state
+    std::vector<sample> _bufferl;
+    std::vector<sample> _bufferr;
+    uint64_t _bufferpos;
     bool _opened;
     bool _ended;
 
 };
 
-#endif // LIBTOOLS_OGGVORBISFILEDECODER_HPP
+#endif // LIBTOOLS_FLACDECODER_HPP

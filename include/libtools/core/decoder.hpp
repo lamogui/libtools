@@ -39,35 +39,47 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/core/signal.hpp>
 #include <libtools/core/production.hpp>
 
-class LIBTOOLS_PRIVATE Decoder : public MusicProduction
+class LIBTOOLS_PRIVATE MusicDecoder : public MusicProduction
 {
   public:
-    Decoder() {}
-    virtual ~Decoder() {}
+    MusicDecoder() : _sampleRate(0) {}
+    virtual ~MusicDecoder() {}
 
     bool open(const string_t& filename);
+    bool load(const uint8_t* buffer, unsigned int data);
     inline string_t name() { return _name; }
     inline string_t author() { return _artist; }
     inline string_t filename() { return _filename; }
     inline Production::GenreId genre() {return _genre;}
     
+    bool parseComment(const string_t& field, const string_t &value); //Ogg vorbis comments specs
+
+    static bool splitComment( const char *comment, unsigned int size,
+                              string_t& field, string_t& value);
+
+
     virtual unsigned int fetch(Signal& outleft, Signal& outright) = 0;
   
     virtual bool ended() const = 0; //can fetch ?
     virtual void rewind() = 0; //restart the production
     virtual double length() const = 0; //Length of the music in seconds
+
+    unsigned int sampleRate() const { return _sampleRate; } //Sample rate
   
   protected:
   
     virtual bool _open(const string_t& filename)=0;
+    virtual bool _load(const uint8_t* buffer, unsigned int data)=0;
     
     void setName(const string_t& name);
     void setAuthor(const string_t& artist);
     void setGenre(const string_t& genre);
+
+    unsigned int _sampleRate;
     
   private:
   
-    void _namereset();
+    void _infosreset();
   
     string_t _filename;
     string_t _name;

@@ -130,7 +130,7 @@ TFDeLoorPrecomputer::~TFDeLoorPrecomputer()
   if(_table) free(_table);
 }
 
-bool TFDeLoorPrecomputer::start(Decoder* decoder)
+bool TFDeLoorPrecomputer::start(MusicDecoder* decoder)
 {
   sf::Lock lock(_mutex);
   _progress=0;

@@ -16,7 +16,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 */
 
 /**
-  * THIS FILE IS PART OF
+  * THIS FILE IS PART OF LIBTOOLS
   * SECURITY LEVEL : 8
   * VISIBILITY     : PRIVATE
   * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED
@@ -39,19 +39,22 @@ OggVorbisFileDecoder::OggVorbisFileDecoder():
   _opened(false),
   _ended(true)
 {
-  _buffer.resize(1024*2);
   _resetCallbacks();
 }
 
 OggVorbisFileDecoder::~OggVorbisFileDecoder()
 {
-  _resetCallbacks();
+  _reset();
 }
 
 bool OggVorbisFileDecoder::_open(const string_t& filename)
 {
   _reset();
-   _file=fopen(string_t_to_std(filename).c_str(),"rb");
+#if defined(LIBTOOLS_WINDOWS) && defined(string_t_w_available)
+  _file=_wfopen(string_t_to_stdw(filename).c_str(),L"rb");
+#else
+  _file=fopen(string_t_to_std(filename).c_str(),"rb");
+#endif
    if (!_file)
    {
      std::cerr << "OggVorbisFileDecoder cannot open file: " << string_t_to_std(filename) << std::endl;
@@ -69,6 +72,7 @@ bool OggVorbisFileDecoder::_open(const string_t& filename)
 
    _parseComments();
    _opened=true;
+   _ended=false;
    return true;
 }
 
@@ -76,8 +80,9 @@ void OggVorbisFileDecoder::_reset()
 {
   if (_opened)
   {
-    ov_clear(&_vf);
+    ov_clear(&_vf); //this call fclose(_file) if needed
   }
+
   _file=NULL;
   _resetCallbacks();
   _opened=false;
@@ -94,51 +99,6 @@ void OggVorbisFileDecoder::_resetCallbacks()
   _callbacks.read_func=NULL;
   _callbacks.tell_func=NULL;
   _callbacks.seek_func=NULL;
-}
-
-bool OggVorbisFileDecoder::splitComment(
-    const char* comment,
-    unsigned int size,
-    string_t& field,
-    string_t& value)
-{
-#ifdef STRING_T_IS_SF_STRING
-  sf::String str=sf::String::fromUtf8(comment, &(comment[size]));
-  size_t split=str.find(sf::String("="));
-  if (split==sf::String::InvalidPos){
-    return false;
-  } else {
-    field=str.substring(0,split);
-    value=str.substring(split+1);
-    sf::String::Iterator it;
-    for (it=field.begin(); it !=field.end(); it++)
-    {
-      *it=toupper(*it);
-    }
-
-    //std::cout << "field " << field.toAnsiString() << "=" << value.toAnsiString() << std::endl;
-    return true;
-  }
-#else
-  return false;
-#endif
-}
-
-bool OggVorbisFileDecoder::parseComment(
-    const string_t& field,
-    const string_t& value)
-{
-  if (field==string_t("TITLE"))
-  {
-    setName(value);
-    return true;
-  }
-  else if (field==string_t("ARTIST"))
-  {
-    setAuthor(value);
-    return true;
-  }
-  return false;
 }
 
 void OggVorbisFileDecoder::_parseComments()
@@ -167,10 +127,11 @@ bool OggVorbisFileDecoder::_checkInfos()
     {
       std::cout << "OggVorbisFileDecoder warning: Too many channels (" <<  infos->channels << ")" << std::endl;
     }
-    if (infos->rate != Signal::frequency)
+    _sampleRate=infos->rate;
+    if (_sampleRate != Signal::frequency)
     {
       std::cout << "OggVorbisFileDecoder warning: sample rate (" <<
-                   infos->rate << "Hz) different of Signal rate (" <<
+                   _sampleRate << "Hz) different of Signal rate (" <<
                    Signal::frequency << ")" << std::endl;
     }
     _infos=*infos; //Make a copy
@@ -248,7 +209,7 @@ void OggVorbisFileDecoder::rewind()
   }
 }
 
-bool OggVorbisFileDecoder::load(const uint8_t* data, unsigned int size)
+bool OggVorbisFileDecoder::_load(const uint8_t* data, unsigned int size)
 {
   _reset();
   _data=data;
@@ -288,32 +249,26 @@ size_t OggVorbisFileDecoder::_read_func(void* ptr, size_t size, size_t nmeb, voi
 {
   OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
   size_t cpy_size=size*nmeb;
-  //std::cerr << "_read_func " << datasource << " decoder->_dataindex " << decoder->_dataindex << " decoder->_datasize "  << decoder->_datasize << std::endl;
-  //std::cerr << "request " << cpy_size << " size " << size << " nmeb " << nmeb << std::endl;
   if ( decoder->_dataindex >= decoder->_datasize)
   {
     return 0;
   }
   if (cpy_size > decoder->_datasize - decoder->_dataindex)
   {
-    //std::cerr << "correcting cpy_size " << decoder->_datasize - decoder->_dataindex << std::endl;
     cpy_size=decoder->_datasize - decoder->_dataindex;
   }
   memcpy(ptr,(void*)&(decoder->_data[decoder->_dataindex]),cpy_size);
 
   decoder->_dataindex+=cpy_size;
-  //std::cerr << "end _read_func " << datasource << " decoder->_dataindex " << decoder->_dataindex << " decoder->_datasize "  << decoder->_datasize << std::endl;
   return cpy_size;
 }
 
 int OggVorbisFileDecoder::_seek_func(void *datasource, ogg_int64_t offset, int whence)
 {
   OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
-  //std::cerr << "_seek_func " << datasource << " decoder->_dataindex " << decoder->_dataindex << " decoder->_datasize "  << decoder->_datasize << std::endl;
   switch (whence)
   {
     case SEEK_SET:
-      //std::cerr << "SEEK_SET" << "offset " << offset << std::endl;
       if (offset >= 0 && offset < decoder->_datasize)
       {
         decoder->_dataindex=offset;
@@ -321,7 +276,6 @@ int OggVorbisFileDecoder::_seek_func(void *datasource, ogg_int64_t offset, int w
       }
       break;
     case SEEK_CUR:
-      //std::cerr << "SEEK_CUR" << "offset " << offset << std::endl;
       if ((ogg_int64_t)decoder->_dataindex + offset <= (ogg_int64_t)decoder->_datasize &&
           (ogg_int64_t)decoder->_dataindex + offset >= (ogg_int64_t)0)
       {
@@ -330,7 +284,6 @@ int OggVorbisFileDecoder::_seek_func(void *datasource, ogg_int64_t offset, int w
       }
       break;
     case SEEK_END:
-      //std::cerr << "SEEK_END" << "offset " << offset << std::endl;
       if ((ogg_int64_t)decoder->_datasize + offset <= (ogg_int64_t)decoder->_datasize &&
           (ogg_int64_t)decoder->_datasize + offset >= (ogg_int64_t)0)
       {
@@ -347,6 +300,5 @@ int OggVorbisFileDecoder::_seek_func(void *datasource, ogg_int64_t offset, int w
 long OggVorbisFileDecoder::_tell_func(void *datasource)
 {
   OggVorbisFileDecoder* decoder=(OggVorbisFileDecoder*) datasource;
-  //std::cerr << "_tell_func " << datasource << " decoder->_dataindex " << decoder->_dataindex << " decoder->_datasize "  << decoder->_datasize << std::endl;
   return decoder->_dataindex;
 }

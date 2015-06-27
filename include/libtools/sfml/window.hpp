@@ -182,12 +182,16 @@ class NEWindow : public sf::RenderWindow
 
 #ifdef LIBTOOLS_WINDOWS
     static bool hasUnicodeSupport();
-    static LRESULT CALLBACK lamoguiWinProc(HWND hwnd,
+    static LRESULT CALLBACK neWinProc(HWND hwnd,
                                   UINT uMsg,
                                   WPARAM wParam,
                                   LPARAM lParam);
     static void registerClass();
     static void forwardMessages();
+    static bool sendFilepathsW(const wchar_t *win_name , int argc,wchar_t** argv);
+
+    static void setCurrentDirToExecutablePath();
+
   protected:
     static std::map<HWND,NEWindow*> _wins;
   private:
