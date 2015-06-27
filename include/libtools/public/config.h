@@ -30,6 +30,14 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   
 #ifndef LIBTOOLS_CONFIGURED
  
+#ifndef UNICODE
+ #undef _UNICODE
+#else
+ #ifndef _UNICODE
+  #define _UNICODE
+ #endif
+#endif
+
 //Dependencies
 #ifdef __cplusplus
   #if (_MSC_VER >= 1700) || (__cplusplus > 199711L)

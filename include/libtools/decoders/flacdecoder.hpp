@@ -59,9 +59,9 @@ class FlacDecoder : public MusicDecoder
   protected:
     virtual bool _open(const string_t& filename);
     virtual bool _load(const uint8_t* buffer, unsigned int size);
+    virtual void _reset();
 
   private:
-    void _reset();
 
 
     static FLAC__StreamDecoderWriteStatus _write_callback(
@@ -95,6 +95,7 @@ class FlacDecoder : public MusicDecoder
     uint64_t _bufferpos;
     bool _opened;
     bool _ended;
+    bool _error;
 
 };
 

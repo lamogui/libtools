@@ -86,7 +86,6 @@ class LIBTOOLS_PRIVATE BassDecoder : public MusicDecoder
     unsigned int frames();
     virtual double length() const;
     
-    void reset();
     
     virtual unsigned int fetch(Signal& outleft, Signal& outright);
 
@@ -97,6 +96,7 @@ class LIBTOOLS_PRIVATE BassDecoder : public MusicDecoder
   protected:
     virtual bool _open(const string_t& filename);
     virtual bool _load(const uint8_t* buffer, unsigned int size);
+    virtual void _reset();
 
     bool prepareDecode();
     bool decodeID3v2();

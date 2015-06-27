@@ -126,7 +126,7 @@ BassDecoder::~BassDecoder()
     free(_samplesForSignals);
 }
 
-void BassDecoder::reset()
+void BassDecoder::_reset()
 {
   if (
 #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
@@ -143,7 +143,6 @@ void BassDecoder::reset()
 
 bool BassDecoder::_open(const string_t& filename)
 {
-  reset();
   _mod=false;
   #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
   if (BASS_MusicLoad && 
@@ -228,7 +227,6 @@ bool BassDecoder::_open(const string_t& filename)
 
 bool BassDecoder::_load(const uint8_t* buffer, unsigned int size)
 {
-  reset();
   _mod=false;
   #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
   if (BASS_MusicLoad &&

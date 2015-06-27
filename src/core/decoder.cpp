@@ -112,7 +112,7 @@ static void remove_file_extension(string_t& str) {
 
 
 bool MusicDecoder::open(const string_t& filename){
-  _infosreset();
+  reset();
   bool r=this->_open(filename);
   if (r) {
     _filename=filename;
@@ -165,8 +165,14 @@ bool MusicDecoder::open(const string_t& filename){
 
 bool MusicDecoder::load(const uint8_t* buffer, unsigned int size)
 {
-  _infosreset();
+  reset();
   return _load(buffer,size);
+}
+
+void MusicDecoder::reset()
+{
+  _infosreset();
+  _reset();
 }
 
 void MusicDecoder::setName(const string_t& name){

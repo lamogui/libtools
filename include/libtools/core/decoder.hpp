@@ -66,10 +66,13 @@ class LIBTOOLS_PRIVATE MusicDecoder : public MusicProduction
 
     unsigned int sampleRate() const { return _sampleRate; } //Sample rate
   
+    void reset(); //Reset the decoder
+
   protected:
   
     virtual bool _open(const string_t& filename)=0;
     virtual bool _load(const uint8_t* buffer, unsigned int data)=0;
+    virtual void _reset() = 0;
     
     void setName(const string_t& name);
     void setAuthor(const string_t& artist);

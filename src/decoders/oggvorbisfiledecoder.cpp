@@ -49,7 +49,6 @@ OggVorbisFileDecoder::~OggVorbisFileDecoder()
 
 bool OggVorbisFileDecoder::_open(const string_t& filename)
 {
-  _reset();
 #if defined(LIBTOOLS_WINDOWS) && defined(string_t_w_available)
   _file=_wfopen(string_t_to_stdw(filename).c_str(),L"rb");
 #else
@@ -66,7 +65,7 @@ bool OggVorbisFileDecoder::_open(const string_t& filename)
        ov_test_open(&_vf) ||
        !_checkInfos())
    {
-     _reset();
+     reset();
      return false;
    }
 
@@ -211,7 +210,6 @@ void OggVorbisFileDecoder::rewind()
 
 bool OggVorbisFileDecoder::_load(const uint8_t* data, unsigned int size)
 {
-  _reset();
   _data=data;
   _datasize=size;
   if (!_data)
@@ -233,7 +231,7 @@ bool OggVorbisFileDecoder::_load(const uint8_t* data, unsigned int size)
       ovto_result ||
       !_checkInfos())
   {
-    _reset();
+    reset();
 #ifndef NDEBUG
     std::cerr << "OggVorbisFileDecoder error: ov_test_callbacks " << ovtc_result << " ov_test_open " << ovto_result << std::endl;
 #endif

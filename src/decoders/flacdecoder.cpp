@@ -39,7 +39,8 @@ FlacDecoder::FlacDecoder():
   _datasize(0),
   _bufferpos(0),
   _opened(false),
-  _ended(true)
+  _ended(true),
+  _error(false)
 {
   _streamdecoder=FLAC__stream_decoder_new();
   assert(_streamdecoder);
@@ -62,10 +63,8 @@ FlacDecoder::~FlacDecoder()
 
 bool FlacDecoder::_open(const string_t& filename)
 {
-  _reset();
 #if defined(LIBTOOLS_WINDOWS) && defined(string_t_w_available)
   _file=_wfopen(string_t_to_stdw(filename).c_str(),L"rb");
-
 #else
   _file=fopen(string_t_to_std(filename).c_str(),"rb");
 #endif
@@ -74,6 +73,7 @@ bool FlacDecoder::_open(const string_t& filename)
      std::cerr << "FlacDecoder cannot open file: " << string_t_to_std(filename) << std::endl;
      return false;
    }
+   _error=false;
    FLAC__StreamDecoderInitStatus init_status=
    FLAC__stream_decoder_init_FILE(_streamdecoder,_file,
                                   &FlacDecoder::_write_callback,
@@ -82,8 +82,9 @@ bool FlacDecoder::_open(const string_t& filename)
                                   (void*) this);
 
    assert(init_status==FLAC__STREAM_DECODER_INIT_STATUS_OK);
-   if (!FLAC__stream_decoder_process_until_end_of_metadata(_streamdecoder))
+   if (!FLAC__stream_decoder_process_until_end_of_metadata(_streamdecoder) || _error)
    {
+     _error=false;
      init_status=
      FLAC__stream_decoder_init_ogg_FILE(_streamdecoder,_file,
                                         &FlacDecoder::_write_callback,
@@ -91,7 +92,7 @@ bool FlacDecoder::_open(const string_t& filename)
                                         &FlacDecoder::_error_callback,
                                         (void*) this);
      assert(init_status==FLAC__STREAM_DECODER_INIT_STATUS_OK);
-     if (!FLAC__stream_decoder_process_until_end_of_metadata(_streamdecoder))
+     if (!FLAC__stream_decoder_process_until_end_of_metadata(_streamdecoder)||_error)
      {
        std::cerr << "FlacDecoder file: " << string_t_to_std(filename) << " is not a FLAC or OGG FLAC file" << std::endl;
        FLAC__stream_decoder_reset(_streamdecoder);
@@ -121,6 +122,7 @@ void FlacDecoder::_reset()
   _file=NULL;
   _opened=false;
   _ended=true;
+  _error=false;
   _data=NULL;
   _datasize=0;
   _dataindex=0;
@@ -186,7 +188,6 @@ void FlacDecoder::rewind()
 
 bool FlacDecoder::_load(const uint8_t* data, unsigned int size)
 {
-  _reset();
   _data=data;
   _datasize=size;
   if (!_data)
@@ -275,5 +276,6 @@ void FlacDecoder::_error_callback(const FLAC__StreamDecoder* decoder,
                                   FLAC__StreamDecoderErrorStatus status,
                                   void* client_data)
 {
- std::cerr << "FlacDecoder error: Error callback call with status code " << status << std::endl;
+ //std::cerr << "FlacDecoder error: Error callback call with status code " << status << std::endl;
+  ((FlacDecoder*)client_data)->_error=true;
 }

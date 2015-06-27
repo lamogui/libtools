@@ -763,17 +763,14 @@ bool NEWindow::sendFilepathsW(const wchar_t* win_name , int argc, wchar_t **argv
 
     // Command line is not empty. Send the
     // command line in a WM_COPYDATA message.
-    if (argc > 1) {
-      for (unsigned int i=1; i < argc;i++){
-        COPYDATASTRUCT cds;
-        size_t len=wcslen(argv[i]);
-        cds.cbData = (len+1)*sizeof(wchar_t);
-        wchar_t* data=(wchar_t*) malloc(cds.cbData);
-        memcpy((void*) data, argv[i], cds.cbData);
-        cds.lpData = (void*) data;
-        SendMessageA(
-              win, WM_COPYDATA, 0, (LPARAM)&cds);
-      }
+    for (unsigned int i=0; i < argc;i++){
+      COPYDATASTRUCT cds;
+      size_t len=wcslen(argv[i]);
+      cds.cbData = (len+1)*sizeof(wchar_t);
+      wchar_t* data=(wchar_t*) malloc(cds.cbData);
+      memcpy((void*) data, (void*) argv[i], cds.cbData);
+      cds.lpData = (void*) data;
+      SendMessageW(win, WM_COPYDATA, 0, (LPARAM)&cds);
     }
     return true;
   }
