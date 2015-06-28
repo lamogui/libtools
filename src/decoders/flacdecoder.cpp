@@ -32,6 +32,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/decoders/oggvorbisfiledecoder.hpp>
 
 FlacDecoder::FlacDecoder():
+  MusicDecoder("FlacDecoder"),
   _streamdecoder(NULL),
   _file(NULL),
   _data(NULL),
@@ -69,8 +70,10 @@ bool FlacDecoder::_open(const string_t& filename)
   _file=fopen(string_t_to_std(filename).c_str(),"rb");
 #endif
    if (!_file)
-   {
+   { 
+#ifndef NDEBUG
      std::cerr << "FlacDecoder cannot open file: " << string_t_to_std(filename) << std::endl;
+#endif
      return false;
    }
    _error=false;
@@ -82,9 +85,12 @@ bool FlacDecoder::_open(const string_t& filename)
                                   (void*) this);
 
    assert(init_status==FLAC__STREAM_DECODER_INIT_STATUS_OK);
+   FLAC__stream_decoder_set_metadata_respond(_streamdecoder,FLAC__METADATA_TYPE_STREAMINFO);
+   FLAC__stream_decoder_set_metadata_respond(_streamdecoder,FLAC__METADATA_TYPE_VORBIS_COMMENT);
    if (!FLAC__stream_decoder_process_until_end_of_metadata(_streamdecoder) || _error)
    {
      _error=false;
+     FLAC__stream_decoder_finish(_streamdecoder);
      init_status=
      FLAC__stream_decoder_init_ogg_FILE(_streamdecoder,_file,
                                         &FlacDecoder::_write_callback,
@@ -92,15 +98,19 @@ bool FlacDecoder::_open(const string_t& filename)
                                         &FlacDecoder::_error_callback,
                                         (void*) this);
      assert(init_status==FLAC__STREAM_DECODER_INIT_STATUS_OK);
+     FLAC__stream_decoder_set_metadata_respond(_streamdecoder,FLAC__METADATA_TYPE_STREAMINFO);
+     FLAC__stream_decoder_set_metadata_respond(_streamdecoder,FLAC__METADATA_TYPE_VORBIS_COMMENT);
      if (!FLAC__stream_decoder_process_until_end_of_metadata(_streamdecoder)||_error)
      {
+
+#ifndef NDEBUG
        std::cerr << "FlacDecoder file: " << string_t_to_std(filename) << " is not a FLAC or OGG FLAC file" << std::endl;
-       FLAC__stream_decoder_reset(_streamdecoder);
+#endif
+       FLAC__stream_decoder_finish(_streamdecoder);
        fclose(_file);
        return false;
      }
    }
-
    uint64_t music_len=FLAC__stream_decoder_get_total_samples(_streamdecoder);
    _bufferl.reserve(music_len);
    _bufferr.reserve(music_len);
@@ -252,7 +262,7 @@ void FlacDecoder::_metadata_callback(const FLAC__StreamDecoder* decoder,
       flac_decoder->_sampleRate=metadata->data.stream_info.sample_rate;
       if (metadata->data.stream_info.channels > 2)
       {
-          std::cout << "FlacDecoder warning: Too many channels (" << metadata->data.stream_info.channels << " availables)" << std::endl;
+        std::cout << "FlacDecoder warning: Too many channels (" << metadata->data.stream_info.channels << " availables)" << std::endl;
       }
       break;
     case FLAC__METADATA_TYPE_VORBIS_COMMENT:

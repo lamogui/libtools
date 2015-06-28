@@ -29,9 +29,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   *                production.hpp
   */
 
-  #include <libtools/public/config.h>
-  #include <libtools/core/decoder.hpp>
-  
+#include <libtools/public/config.h>
+#include <libtools/core/decoder.hpp>
+#include <assert.h>
   
 void MusicDecoder::_infosreset() {
   _filename=string_t();
@@ -236,3 +236,119 @@ bool MusicDecoder::splitComment(
   return false;
 #endif
 }
+
+
+MusicDecoders::MusicDecoders():
+  MusicDecoder("no decoders"),
+  _currentDecoder(NULL)
+{
+}
+
+MusicDecoders::~MusicDecoders()
+{
+  std::vector<MusicDecoder*>::iterator it;
+  for (it=_decoders.begin();it != _decoders.end(); it++)
+  {
+    delete *it;
+  }
+}
+
+bool MusicDecoders::ended() const
+{
+  if (_currentDecoder)
+  {
+    return _currentDecoder->ended();
+  }
+  return true;
+}
+void MusicDecoders::rewind()
+{
+  if (_currentDecoder)
+  {
+    _currentDecoder->rewind();
+  }
+}
+
+double MusicDecoders::length() const
+{
+  if (_currentDecoder)
+  {
+    return _currentDecoder->length();
+  }
+  return 0.;
+}
+
+
+bool MusicDecoders::_open(const string_t& filename)
+{
+
+  std::vector<MusicDecoder*>::iterator it;
+  for (it=_decoders.begin();it != _decoders.end(); it++)
+  {
+    if ((*it)->_open(filename))
+    {
+      _currentDecoder=*it;
+      _transmitInfos();
+      return true;
+    }
+  }
+  _currentDecoder=NULL;
+  return false;
+}
+
+bool MusicDecoders::_load(const uint8_t* buffer, unsigned int data)
+{
+  std::vector<MusicDecoder*>::iterator it;
+  for (it=_decoders.begin();it != _decoders.end(); it++)
+  {
+    if ((*it)->_load(buffer,data))
+    {
+      _currentDecoder=*it;
+      _transmitInfos();
+      return true;
+    }
+  }
+  _currentDecoder=NULL;
+  return false;
+}
+
+void MusicDecoders::_reset()
+{
+  if (_currentDecoder)
+  {
+    _currentDecoder->_reset();
+  }
+}
+
+
+void MusicDecoders::_transmitInfos()
+{
+  //if (_currentDecoder)
+  assert(_currentDecoder);
+  {
+    setName(_currentDecoder->name());
+    setAuthor(_currentDecoder->author());
+    _genre=_currentDecoder->genre();
+    _sampleRate=_currentDecoder->sampleRate();
+    _decodername=_currentDecoder->decoder();
+  }
+}
+
+
+void MusicDecoders::append(MusicDecoder* decoder)
+{
+  assert(decoder);
+  _decoders.push_back(decoder);
+}
+
+
+unsigned int MusicDecoders::fetch(Signal& outleft, Signal& outright)
+{
+  if (_currentDecoder)
+  {
+    return _currentDecoder->fetch(outleft,outright);
+  }
+  return 0;
+}
+
+

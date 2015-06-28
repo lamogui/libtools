@@ -39,10 +39,17 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/core/signal.hpp>
 #include <libtools/core/production.hpp>
 
+class MusicDecoders;
+
 class LIBTOOLS_PRIVATE MusicDecoder : public MusicProduction
 {
+    friend class MusicDecoders;
+
   public:
-    MusicDecoder() : _sampleRate(0) {}
+    MusicDecoder(const string_t& decoder_name) :
+      _sampleRate(0),
+      _decodername(decoder_name)
+    {}
     virtual ~MusicDecoder() {}
 
     bool open(const string_t& filename);
@@ -64,9 +71,11 @@ class LIBTOOLS_PRIVATE MusicDecoder : public MusicProduction
     virtual void rewind() = 0; //restart the production
     virtual double length() const = 0; //Length of the music in seconds
 
-    unsigned int sampleRate() const { return _sampleRate; } //Sample rate
+     unsigned int sampleRate() const { return _sampleRate; } //Sample rate
   
     void reset(); //Reset the decoder
+
+    inline string_t decoder() const { return _decodername; }
 
   protected:
   
@@ -87,7 +96,47 @@ class LIBTOOLS_PRIVATE MusicDecoder : public MusicProduction
     string_t _filename;
     string_t _name;
     string_t _artist;
+    string_t _decodername;
     Production::GenreId _genre;
+
+};
+
+/**
+  Music decoder can aggregate multiples decoders
+  When you try to open a file, MusicDecoders will try to open it using
+  the Decoders you passed it with the repect of the order.
+  If it find a decoder that open correctly the file it will continue to decode
+  with this decoder else it will return false.
+
+  When MusicDecoders is deleted it will delete all the decoders.
+*/
+class LIBTOOLS_PRIVATE MusicDecoders : public MusicDecoder
+{
+  public:
+    MusicDecoders();
+    virtual ~MusicDecoders();
+
+    virtual unsigned int fetch(Signal& outleft, Signal& outright);
+
+    virtual bool ended() const;
+    virtual void rewind();
+    virtual double length() const;
+
+    void append(MusicDecoder* decoder);
+
+  protected:
+    virtual bool _open(const string_t& filename);
+    virtual bool _load(const uint8_t* buffer, unsigned int data);
+    virtual void _reset();
+
+  private:
+
+    void _transmitInfos();
+
+    std::vector<MusicDecoder*> _decoders;
+    MusicDecoder* _currentDecoder;
+
+
 };
 
 #endif

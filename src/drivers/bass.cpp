@@ -99,6 +99,7 @@ string_t BassDecoder::handleBassChannelPlayError()
 }
 
 BassDecoder::BassDecoder():
+  MusicDecoder("BassDecoder"),
 _music(0),
 _mod(false),
 _ended(true),
@@ -173,32 +174,12 @@ bool BassDecoder::_open(const string_t& filename)
                                         BASS_STREAM_DECODE | 
                                         BASS_SAMPLE_FLOAT | 
                                         BASS_UNICODE));
-	else if (
-#if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
-           BASS_FLAC_StreamCreateFile && 
-#endif
-           (_music=BASS_FLAC_StreamCreateFile(FALSE, 
-                                              unicode_filename, 0,0,
-                                              BASS_STREAM_PRESCAN | 
-                                              BASS_STREAM_DECODE | 
-                                              BASS_SAMPLE_FLOAT | 
-                                              BASS_UNICODE)));
 	else if (_music=BASS_StreamCreateURL((const char *)unicode_filename,0,
                                         BASS_STREAM_DECODE | 
                                         BASS_SAMPLE_FLOAT | 
                                         BASS_UNICODE, 
                                         (DOWNLOADPROC*) 0,
                                         (void*)0));
-	else if (
-#if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
-           BASS_FLAC_StreamCreateURL && 
-#endif
-           (_music=BASS_FLAC_StreamCreateURL((const char *)unicode_filename,0,
-                                                    BASS_STREAM_DECODE | 
-                                                    BASS_SAMPLE_FLOAT | 
-                                                    BASS_UNICODE, 
-                                                    (DOWNLOADPROC*) 0,
-                                                    (void*)0)));
   if (_music)
   {
     BASS_ChannelGetInfo((DWORD)_music,&_infos);
@@ -206,7 +187,11 @@ bool BassDecoder::_open(const string_t& filename)
     _samplesForSignals = (float*) realloc(_samplesForSignals,_bytesFrame);
     _sampleRate=_infos.freq;
     if (_sampleRate != Signal::frequency)
+    {
+#ifndef NDEBUG
       std::cout << "warning : file rate (" << _sampleRate << "Hz) is different of " << Signal::frequency << "Hz" << std::endl;
+#endif
+    }
     _ended=false;
     
     if (prepareDecode()) {
@@ -217,7 +202,9 @@ bool BassDecoder::_open(const string_t& filename)
   }
   #if defined(LIBTOOLS_WINDOWS) && !defined(BASS_H)
   } else {
+#ifndef NDEBUG
     std::cerr << "Error missing bass fonctions in DLL " << std::endl;
+#endif
   }
   #endif
   return (_music);

@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
 NOBODY IS PERMITTED TO COPY AND DISTRIBUTE VERBATIM OR MODIFIED COPIES OF
@@ -139,7 +139,8 @@ class LIBTOOLS_PRIVATE AbstractButton : public MouseCatcher, public sf::Transfor
     virtual void onMouseRelease(float x, float y);
     virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
     virtual void update();
-      
+
+    inline sf::Vector2f getSize() const { return _shape.getSize(); }
       
   protected:
     void released();
@@ -154,7 +155,7 @@ class LIBTOOLS_PRIVATE AbstractButton : public MouseCatcher, public sf::Transfor
     sf::RectangleShape _lightup;
     sf::RectangleShape _lightleft;
     sf::RectangleShape _shadowright;
-	sf::RectangleShape _shadowdown;
+    sf::RectangleShape _shadowdown;
     sf::Text _text;
     sf::IntRect _idleRect;
     sf::IntRect _clickedRect;

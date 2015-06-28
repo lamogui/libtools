@@ -31,6 +31,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <iostream>
 
 OggVorbisFileDecoder::OggVorbisFileDecoder():
+  MusicDecoder("OggVorbisFileDecoder"),
   _file(NULL),
   _data(NULL),
   _dataindex(0),
@@ -56,15 +57,20 @@ bool OggVorbisFileDecoder::_open(const string_t& filename)
 #endif
    if (!_file)
    {
+#ifndef NDEBUG
      std::cerr << "OggVorbisFileDecoder cannot open file: " << string_t_to_std(filename) << std::endl;
+#endif
      return false;
    }
 
    _callbacks=OV_CALLBACKS_DEFAULT;
-   if (ov_test_callbacks((void*)_file,&_vf,NULL,0,_callbacks) ||
-       ov_test_open(&_vf) ||
-       !_checkInfos())
+   int ovtc_result=ov_test_callbacks((void*)_file,&_vf,NULL,0,_callbacks);
+   int ovto_result=ov_test_open(&_vf);
+   if ( ovtc_result || ovto_result || !_checkInfos())
    {
+#ifndef NDEBUG
+    std::cerr << "OggVorbisFileDecoder error: ov_test_callbacks " << ovtc_result << " ov_test_open " << ovto_result << std::endl;
+#endif
      reset();
      return false;
    }
@@ -129,14 +135,18 @@ bool OggVorbisFileDecoder::_checkInfos()
     _sampleRate=infos->rate;
     if (_sampleRate != Signal::frequency)
     {
+#ifndef NDEBUG
       std::cout << "OggVorbisFileDecoder warning: sample rate (" <<
                    _sampleRate << "Hz) different of Signal rate (" <<
                    Signal::frequency << ")" << std::endl;
+#endif
     }
     _infos=*infos; //Make a copy
     return true;
   }
+#ifndef NDEBUG
   std::cerr << "OggVorbisFileDecoder error: cannot get stream infos from file" << std::endl;
+#endif
   return false;
 }
 
@@ -201,7 +211,9 @@ void OggVorbisFileDecoder::rewind()
   if (!_opened) return;
   if (ov_pcm_seek(&_vf,0))
   {
+#ifndef NDEBUG
     std::cerr << "OggVorbisFileDecoder error: cannot seek" << std::endl;
+#endif
   } else
   {
     _ended=false;
@@ -231,10 +243,10 @@ bool OggVorbisFileDecoder::_load(const uint8_t* data, unsigned int size)
       ovto_result ||
       !_checkInfos())
   {
-    reset();
 #ifndef NDEBUG
     std::cerr << "OggVorbisFileDecoder error: ov_test_callbacks " << ovtc_result << " ov_test_open " << ovto_result << std::endl;
 #endif
+    reset();
     return false;
   }
 

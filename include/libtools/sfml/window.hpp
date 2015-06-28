@@ -99,6 +99,8 @@ class NEWindow : public sf::RenderWindow
       _interfaces.clear();
     }
 
+    void minimize();
+
 #ifdef LIBTOOLS_WINDOWS
   void setZPosition(HWND insert_after);
   void setTransparency(uint8_t alpha);
@@ -141,6 +143,7 @@ class NEWindow : public sf::RenderWindow
     bool _onMoveWin;
     bool _onResizeWin;
     int _onClose;
+    int _onMinimize;
 
     //previous positions...
     sf::Vector2i _previousWinPos;
@@ -151,6 +154,7 @@ class NEWindow : public sf::RenderWindow
 #ifdef LIBTOOLS_WINDOWS
     //Buttons
     Button _closeButton;
+    Button _minimizeButton;
 
     //Resize Triangle
     sf::ConvexShape _resizeTriangle;

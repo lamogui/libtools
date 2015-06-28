@@ -71,9 +71,12 @@ _viewportMax((float)_clientSize.x/(float)mode.width,
 _onMoveWin(false),
 _onResizeWin(false),
 _onClose(0),
+_onMinimize(0),
 #ifdef LIBTOOLS_WINDOWS
 _closeButton(sf::Vector2f(_borderSizeRight+_borderSizeLeft,
                           _borderSizeUp*0.5f),"X",font),
+_minimizeButton(sf::Vector2f((_borderSizeRight+_borderSizeLeft)*2.f/3.f,
+                              _borderSizeUp*.5f),"-",font),
 #endif
 _title(title,font,11),
 _currentInterfaceCatcher(NULL),
@@ -90,8 +93,13 @@ _cleanExit(false)
   //Close Button params
   _closeButton.linkTo(&_onClose,ButtonMode::on);
   _closeButton.setOutlineThickness(0);
-  _closeButton.setClickedColor(sf::Color(142,42,42,255));
-  _closeButton.setIdleColor(sf::Color(100,42,42,255));
+  _closeButton.setClickedColor(sf::Color(200,42,42,128));
+  _closeButton.setIdleColor(sf::Color(142,42,42,128));
+
+  //minimize Button params
+  _minimizeButton.linkTo(&_onMinimize,ButtonMode::on);
+  _minimizeButton.setOutlineThickness(0);
+
 
 
   //ResizeTriangle
@@ -103,6 +111,7 @@ _cleanExit(false)
   _resizeTriangle.setFillColor(sf::Color(75,75,75,255));
 
   registerMouseCatcher(_closeButton);
+  registerMouseCatcher(_minimizeButton);
 
 
     // Compute position and size
@@ -414,6 +423,7 @@ void NEWindow::arrange() {
   _resizeTriangle.setPosition(_clientSize.x+_borderSizeLeft,
                               _clientSize.y+_borderSizeUp);
   _closeButton.setPosition(_clientSize.x-5,5);
+  _minimizeButton.setPosition(_closeButton.getPosition().x-_minimizeButton.getSize().x-5,5);
 #endif
 
    _backSprite.setPosition(-(int)_backCenter.x+(int)_backCenter.x*(int)getSize().x/((int)_backTexture.getSize().x+1),
@@ -512,12 +522,25 @@ void NEWindow::drawContent()
 
 bool NEWindow::checkInterrupt()
 {
+  if (_onMinimize)
+  {
+    minimize();
+    _onMinimize=false;
+    return true;
+  }
   if (_onClose) {
     close();
     _onClose=false;
     return true;
   }
   return false;
+}
+
+void NEWindow::minimize()
+{
+#ifdef LIBTOOLS_WINDOWS
+  ShowWindow(getSystemHandle(),SW_MINIMIZE);
+#endif
 }
 
 

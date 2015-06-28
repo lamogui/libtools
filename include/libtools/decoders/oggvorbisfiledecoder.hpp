@@ -54,9 +54,6 @@ class OggVorbisFileDecoder : public MusicDecoder
     virtual void rewind();
     virtual double length() const;
 
-    bool parseComment(const string_t& field, const string_t &value);
-
-
   protected:
     virtual bool _open(const string_t& filename);
     virtual bool _load(const uint8_t *data, unsigned int size);
