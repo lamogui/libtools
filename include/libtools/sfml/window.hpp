@@ -104,6 +104,7 @@ class NEWindow : public sf::RenderWindow
 #ifdef LIBTOOLS_WINDOWS
   void setZPosition(HWND insert_after);
   void setTransparency(uint8_t alpha);
+  uint8_t getAlpha() const;
   void setMaskColor(const sf::Color& ref);
 #endif
 

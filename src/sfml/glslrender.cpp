@@ -30,6 +30,8 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 
 #include <libtools/sfml/glslrender.hpp>
 #include <libtools/shaders/shaders.h>
+#include <cstdlib>
+#include <cstring>
 
 GLSLRender::GLSLRender():
 _rectangle(sf::Vector2f(1.f,1.f))
@@ -45,6 +47,8 @@ GLSLRender::~GLSLRender()
 void GLSLRender::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
   states.transform *= getTransform();
+  sf::Shader* s=const_cast<GLSLRender*>(this); //olol
+  s->setParameter("xy_scale_factor",getScale().x/getScale().y);
   sf::Shader::bind(this);
   target.draw(_rectangle,states);
   sf::Shader::bind(NULL);
@@ -52,6 +56,25 @@ void GLSLRender::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 
 std::string GLSLRender::getVertexShaderCode() {
-  return v_vs_src;
+  return coords_vs_src;
 }
 
+
+bool GLSLRender::loadFromFile(const std::string& fragment_file)
+{
+  FILE* f=fopen(fragment_file.c_str(),"r");
+  if (f)
+  {
+    fseek(f,0,SEEK_END);
+    unsigned int size=ftell(f);
+    fseek(f,0,SEEK_SET);
+    char* buffer=(char*)malloc(size+5);
+    memset((void*)buffer,0,size+5);
+    fread((void*)buffer,1,size,f);
+    fclose(f);
+    bool success=loadFromMemory(GLSLRender::getVertexShaderCode(),buffer);
+    free(buffer);
+    return success;
+  }
+  return false;
+}

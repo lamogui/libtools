@@ -101,7 +101,7 @@ class VisualSignalInterface : public Interface
     virtual ~VisualSignalInterface();
 
     virtual void update();
-    void setVisualSignal(VisualSignal* s);
+    void setVisualSignal(const VisualSignal* s);
     void setColor(int rouge,int ver,int bleu, int jaune);
     void addRender(GLSLRender& render,float size);
 
@@ -112,7 +112,7 @@ class VisualSignalInterface : public Interface
 
     void _setupRendered();
 
-    VisualSignal* _visual;
+    const VisualSignal* _visual;
     sf::Text _text;
     sf::RectangleShape _noise;
     sf::RectangleShape _clean;

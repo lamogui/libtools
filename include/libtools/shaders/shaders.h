@@ -49,7 +49,8 @@ extern const char* vls_log_fft_fs_src;
 extern const char* shadertoy_fft_fs_src;
 
 //Vertex
-extern const char* v_vs_src;
+extern const char* v_vs_src; //OBSELETE !!!!!
+extern const char* coords_vs_src;
 
 #ifdef __cplusplus
 }

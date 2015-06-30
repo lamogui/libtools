@@ -286,7 +286,7 @@ VisualSignalInterface::~VisualSignalInterface()
 {
 }
 
-void VisualSignalInterface::setVisualSignal(VisualSignal* s) {
+void VisualSignalInterface::setVisualSignal(const VisualSignal *s) {
   _visual=s;
 }
 

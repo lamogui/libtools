@@ -125,6 +125,11 @@ class circularpurger
     {
       return _offset;
     }
+
+    inline float offsetf() const
+    {
+      return static_cast<float>(offset())/static_cast<float>(size());
+    }
     
   private:
     typename std::vector<T> _vector;

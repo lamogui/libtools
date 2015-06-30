@@ -563,47 +563,40 @@ void NEWindow::setZPosition(HWND insert_after)
   SetWindowPos(this->getSystemHandle(), insert_after, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 }
 
+
+uint8_t NEWindow::getAlpha() const
+{
+  BYTE alpha;
+  DWORD previous_styleflag;
+  DWORD previous_layerflag=0;
+  HWND hWnd=this->getSystemHandle();
+  GetLayeredWindowAttributes(hWnd,0,&alpha,&previous_layerflag);
+  previous_styleflag=GetWindowLongW(hWnd,GWL_EXSTYLE);
+  if (previous_layerflag && previous_styleflag & WS_EX_LAYERED)
+  {
+    return alpha;
+  }
+  return 255;
+}
+
 void NEWindow::setTransparency(uint8_t alpha)
 {
   COLORREF previous_colorref=0;
   DWORD previous_styleflag;
   DWORD previous_layerflag=0;
   HWND hWnd=this->getSystemHandle();
-
   GetLayeredWindowAttributes(hWnd,&previous_colorref,NULL,&previous_layerflag);
-  bool unicode=hasUnicodeSupport();
-  if (unicode)
-  {
-    previous_styleflag=GetWindowLongW(hWnd,GWL_EXSTYLE);
-  }
-  else
-  {
-    previous_styleflag=GetWindowLongA(hWnd, GWL_EXSTYLE);
-  }
+  previous_styleflag=GetWindowLongW(hWnd,GWL_EXSTYLE);
 
   if (alpha==255 && !previous_layerflag)
   {
-    if (unicode)
-    {
-      SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
-    }
-    else
-    {
-      SetWindowLongA(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
-    }
+    SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
   }
   else
   {
     if ((previous_styleflag & WS_EX_LAYERED) == 0)
     {
-      if (unicode)
-      {
-        SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
-      }
-      else
-      {
-        SetWindowLongA(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
-      }
+      SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
     }
     SetLayeredWindowAttributes(hWnd,
                                previous_colorref,
