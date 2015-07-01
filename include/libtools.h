@@ -72,6 +72,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/decoders/settings.hpp>
 #include <libtools/decoders/oggvorbisfiledecoder.hpp>
 #include <libtools/decoders/flacdecoder.hpp>
+#include <libtools/decoders/agldecoder.hpp>
 
 //drivers (use external library to implement interfaces)
 #if defined(LIBTOOLS_WINDOWS)

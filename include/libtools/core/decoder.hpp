@@ -71,7 +71,7 @@ class LIBTOOLS_PRIVATE MusicDecoder : public MusicProduction
     virtual void rewind() = 0; //restart the production
     virtual double length() const = 0; //Length of the music in seconds
 
-     unsigned int sampleRate() const { return _sampleRate; } //Sample rate
+    unsigned int sampleRate() const { return _sampleRate; } //Sample rate
 
     void reset(); //Reset the decoder
 
