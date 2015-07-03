@@ -581,27 +581,21 @@ uint8_t NEWindow::getAlpha() const
 
 void NEWindow::setTransparency(uint8_t alpha)
 {
-  COLORREF previous_colorref=0;
   DWORD previous_styleflag;
-  DWORD previous_layerflag=0;
   HWND hWnd=this->getSystemHandle();
-  GetLayeredWindowAttributes(hWnd,&previous_colorref,NULL,&previous_layerflag);
   previous_styleflag=GetWindowLongW(hWnd,GWL_EXSTYLE);
 
-  if (alpha==255 && !previous_layerflag)
+  if (alpha==255)
   {
     SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
   }
   else
   {
-    if ((previous_styleflag & WS_EX_LAYERED) == 0)
-    {
-      SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
-    }
+    SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
     SetLayeredWindowAttributes(hWnd,
-                               previous_colorref,
+                               0,
                                alpha,
-                               previous_layerflag | LWA_ALPHA);
+                               LWA_ALPHA);
   }
 }
 
@@ -611,60 +605,21 @@ void NEWindow::setMaskColor(const sf::Color& ref)
   bool desactivate=ref.a!=255;
   COLORREF colorref=RGB(ref.r,ref.g,ref.b);
   DWORD previous_styleflag;
-  DWORD previous_layerflag=0;
-  BYTE previous_alpha=0;
   HWND hWnd=this->getSystemHandle();
 
-  GetLayeredWindowAttributes(hWnd,NULL,&previous_alpha,&previous_layerflag);
-  bool unicode=hasUnicodeSupport();
-  if (unicode)
-  {
-    previous_styleflag=GetWindowLongW(hWnd,GWL_EXSTYLE);
-  }
-  else
-  {
-    previous_styleflag=GetWindowLongA(hWnd, GWL_EXSTYLE);
-  }
+  previous_styleflag=GetWindowLongW(hWnd,GWL_EXSTYLE);
 
-  if (desactivate && !previous_layerflag)
+  if (desactivate)
   {
-    if (unicode)
-    {
       SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
-    }
-    else
-    {
-      SetWindowLongA(hWnd, GWL_EXSTYLE, previous_styleflag & ~WS_EX_LAYERED);
-    }
   }
   else
   {
-    if (previous_styleflag & WS_EX_LAYERED == 0)
-    {
-      if (unicode)
-      {
-        SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
-      }
-      else
-      {
-        SetWindowLongA(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
-      }
-    }
-    if (desactivate)
-    {
-      SetLayeredWindowAttributes(hWnd,
-                                 0,
-                                 previous_alpha,
-                                 previous_layerflag & ~LWA_COLORKEY);
-    }
-    else
-    {
-      SetLayeredWindowAttributes(hWnd,
-                                 colorref,
-                                 previous_alpha,
-                                 previous_layerflag | LWA_COLORKEY);
-      std::cout<<"setLayerATtribut" << std::endl;
-    }
+    SetWindowLongW(hWnd, GWL_EXSTYLE, previous_styleflag | WS_EX_LAYERED);
+    SetLayeredWindowAttributes(hWnd,
+                               colorref,
+                               0,
+                               LWA_COLORKEY);
   }
 }
 
