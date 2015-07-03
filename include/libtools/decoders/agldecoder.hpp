@@ -62,6 +62,8 @@ protected:
   bool _createShader();
   bool _parse(); //Parse the xml
 
+  bool _fillbuffer();
+
 
   tinyxml2::XMLDocument _xmldoc;
 
@@ -77,11 +79,14 @@ private:
   sf::Image _image;
 #else
   GLuint _tex;
-#endif
-
-  std::string _code;
   uint8_t* _pixelsbuffer;
+#endif
+  uint64_t _sample;
+  unsigned int _blockoffset;
+  std::string _code;
 
+  std::vector<sample> _leftbuffer;
+  std::vector<sample> _rightbuffer;
 
 
 };
