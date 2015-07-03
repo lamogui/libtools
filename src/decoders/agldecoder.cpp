@@ -297,7 +297,7 @@ string_t AglDecoder::utf8ToString_t(const char *_utf8)
 
 bool AglDecoder::_parseShaderToyCode(const std::string& code)
 {
-  if (!_createTexture(512))
+  if (!_createTexture(32))
   {
     return false;
   }
@@ -305,7 +305,7 @@ bool AglDecoder::_parseShaderToyCode(const std::string& code)
 #ifdef SFML_GRAPHICS_HPP
   //_tex->setView();
 #else
-  _pixelsbuffer=(uint8_t*)malloc(512*512*4);
+  _pixelsbuffer=(uint8_t*)malloc(32*32*4);
 #endif
 
   char numbuffer[33]={0};
@@ -329,7 +329,7 @@ bool AglDecoder::_parseShaderToyCode(const std::string& code)
   _code+=
     "\nvoid main()"
     "{"
-        "float t = track_time + (gl_FragCoord.x+(512.-gl_FragCoord.y)*512.0)/signal_frequency;"
+        "float t = track_time + (gl_FragCoord.x+(32.-gl_FragCoord.y)*32.0)/signal_frequency;"
 
         "vec2 y = mainSound( t );"
         "vec2 v  = floor((0.5+0.5*y)*4096.0);"
@@ -342,7 +342,7 @@ bool AglDecoder::_parseShaderToyCode(const std::string& code)
   _code +=
       "\nvoid main()"
       "{"
-        "float t=track_time + (gl_FragCoord.x + gl_FragCoord.y*512.)/signal_frequency;"
+        "float t=track_time + (gl_FragCoord.x + gl_FragCoord.y*32.)/signal_frequency;"
         "vec2 y = mainSound(t);"
         "vec2 v  = floor((0.5+0.5*y)*65536.0);"
         "vec2 vl =   mod(v,256.0)/255.0;"
@@ -377,7 +377,7 @@ bool AglDecoder::_fillbuffer()
   std::cout << "viewport width " << _tex->getViewport(_tex->getView()).width << " height " << _tex->getViewport(_tex->getView()).width
             << " top " << _tex->getViewport(_tex->getView()).top << " left " << _tex->getViewport(_tex->getView()).left << std::endl;
 */
-  double track_time=static_cast<double>(_blockoffset*512*512)/static_cast<double>(Signal::frequency);
+  double track_time=static_cast<double>(_blockoffset*32*32)/static_cast<double>(Signal::frequency);
   _shader->setParameter("track_time",static_cast<float>(track_time));
   //std::cout << "track_time "  << track_time << " signal_size  " << Signal::size << std::endl;
   sf::Shader::bind(_shader);
@@ -392,7 +392,7 @@ bool AglDecoder::_fillbuffer()
   itoa(_blockoffset,numbuf,10);
   //_image.saveToFile(std::string("output") + numbuf + std::string(".png"));
   const uint8_t* it=_image.getPixelsPtr();
-  for (unsigned int i=0; i < 512*512; i++)
+  for (unsigned int i=0; i < 32*32; i++)
   {
     int32_t lu= (it[0] << 4) | (it[1] >> 4);
     int32_t ru= (it[2] << 4) | (it[1] & 0xF);
