@@ -36,7 +36,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   
 volatile unsigned int Signal::frequency=44100;
 volatile unsigned int Signal::size=1024;
-volatile float Signal::refreshRate=Signal::frequency/(float)Signal::size;
+volatile double Signal::refreshRate=(double)Signal::frequency/(double)Signal::size;
 volatile unsigned int Signal::byteSize=sizeof(sample)*Signal::size;
 volatile bool Signal::isPow2=true;
 
@@ -154,7 +154,7 @@ void Signal::globalConfigurationFromPow2(unsigned int f,  unsigned short pow2)
 
   pow2 = FFT::getSupPow2(pow2);
   Signal::size = 1 << pow2;
-  Signal::refreshRate = Signal::frequency/(float)Signal::size;
+  Signal::refreshRate = (double)Signal::frequency/(double)Signal::size;
   Signal::byteSize = sizeof(sample)*Signal::size;
   Signal::isPow2 = true;
   for (std::set<Signal*>::iterator it = _instances.begin(); it != _instances.end() ;it++)

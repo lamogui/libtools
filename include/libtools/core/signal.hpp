@@ -88,7 +88,7 @@ class LIBTOOLS_PRIVATE Signal
 
     //Constants for all signals
     volatile static unsigned int frequency; //Fe
-    volatile static float refreshRate;      //Le but c'est d'avoir 50 ici ! le plus possible sera le mieux
+    volatile static double refreshRate;      //Le but c'est d'avoir 50 ici ! le plus possible sera le mieux
     volatile static unsigned int size;
     volatile static unsigned int byteSize;
     volatile static bool isPow2;

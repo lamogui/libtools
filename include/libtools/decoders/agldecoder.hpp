@@ -74,6 +74,7 @@ private:
 #if defined(SFML_GRAPHICS_HPP)
   sf::RenderTexture* _tex;
   sf::Shader* _shader;
+  sf::Image _image;
 #else
   GLuint _tex;
 #endif

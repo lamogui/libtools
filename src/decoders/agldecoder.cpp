@@ -35,28 +35,37 @@ unsigned int AglDecoder::fetch(Signal& outleft, Signal& outright)
     return 0;
 
 #ifdef SFML_GRAPHICS_HPP
-  if (!_pixelsbuffer || !_tex || !_shader)
+  if (!_tex || !_shader)
   {
     return 0;
   }
 
   sf::RectangleShape shape(sf::Vector2f(32.f,32.f));
+  double track_time=static_cast<double>(_frame)/Signal::refreshRate;
+  _shader->setParameter("track_time",static_cast<float>(track_time));
+  _shader->setParameter("frame",(int)_frame);
+  std::cout << "track_time "  << track_time << " signal_size  " << Signal::size << std::endl;
   _tex->setActive(true);
   sf::Shader::bind(_shader);
   _tex->draw(shape);
   sf::Shader::bind(NULL);
-  sf::Texture::bind(&(_tex->getTexture()));
-  glGetTexImage(_tex->getTexture().getNativeHandle(),0,GL_RGBA,GL_UNSIGNED_BYTE,(void*)&_pixelsbuffer);
-  sf::Texture::bind(NULL);
+  _tex->display();
 
-  uint8_t* end=&(_pixelsbuffer[Signal::size*4]);
-  unsigned k=0;
-  for (uint8_t* it=_pixelsbuffer; it < end; it+=4)
+  _image=_tex->getTexture().copyToImage();
+  const uint8_t* pixelsbuffer=_image.getPixelsPtr();
+  unsigned int signal_size=Signal::size;
+  const uint8_t* it=pixelsbuffer;
+  for (unsigned int k=0; k < signal_size; )
   {
-    int16_t l=it[0] | (it[1] << 8);
-    int16_t r=it[2] | (it[3] << 8);
-    outleft.samples[k]=static_cast<float>(l)/65536.f;
-    outright.samples[k++]=static_cast<float>(l)/65536.f;
+    uint16_t lu=it[0] | (it[1] << 8);
+    uint16_t ru=it[2] | (it[3] << 8);
+
+    float l= -1.f + static_cast<float>(lu)*2.f/65535.f;
+    float r= -1.f + static_cast<float>(ru)*2.f/65535.f;
+    outleft.samples[k]=l;
+    outright.samples[k]=r;
+    k++;
+    it+=4;
   }
 #else
 
@@ -67,7 +76,7 @@ unsigned int AglDecoder::fetch(Signal& outleft, Signal& outright)
 
 bool AglDecoder::ended() const
 {
-  return (_musiclength < static_cast<float>(_frame)/static_cast<float>(_sampleRate));
+  return (_musiclength < static_cast<double>(_frame)/Signal::refreshRate);
 }
 
 void AglDecoder::rewind()
@@ -162,7 +171,9 @@ bool AglDecoder::_createTexture(unsigned size)
 {
 #if defined(SFML_GRAPHICS_HPP)
   _tex=new sf::RenderTexture();
-  return _tex->create(size,size,false);
+  bool r=_tex->create(size,size,false);
+  _tex->setSmooth(true);
+  return r;
 #else
   glGenTextures(1,&_tex);
   glBindTexture(GL_TEXTURE_2D,size);
@@ -173,14 +184,6 @@ bool AglDecoder::_createTexture(unsigned size)
   return true;
 #endif
 }
-
-static const char* _vertex_shader_code=
-    "void main()"
-    "{"
-    "gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;"
-    "gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;"
-    "gl_FrontColor = gl_Color;"
-    "}";
 
 bool AglDecoder::_createShader()
 {
@@ -277,7 +280,7 @@ string_t AglDecoder::utf8ToString_t(const char *_utf8)
 {
   assert(_utf8);
 #if defined(STRING_T_IS_SF_STRING)
-  return sf::String::fromUtf8(_utf8, &(_utf8[strlen(_utf8)+1]));
+  return sf::String::fromUtf8(_utf8, &(_utf8[strlen(_utf8)]));
 #else
   return _utf8;
 #endif
@@ -290,17 +293,18 @@ bool AglDecoder::_parseShaderToyCode(const std::string& code)
   {
     return false;
   }
-  _pixelsbuffer=(uint8_t*)malloc(32*32*4);
 
 #ifdef SFML_GRAPHICS_HPP
   _tex->setView(sf::View(sf::FloatRect(0.f,0.f,32.f,32.f)));
 #else
+  _pixelsbuffer=(uint8_t*)malloc(32*32*4);
 #endif
 
   char numbuffer[33]={0};
   itoa(sampleRate(),numbuffer,10);
 
   _code="#version 110\n";
+  _code+="#extension GL_OES_standard_derivatives : enable\n";
   _code+="const float signal_frequency=";
   _code+=numbuffer;
   _code+=".0;";
@@ -310,19 +314,21 @@ bool AglDecoder::_parseShaderToyCode(const std::string& code)
   _code+=numbuffer;
   _code+=".0;";
 
+  _code+="uniform int frame;";
   _code+="uniform float track_time;\n";
- // _code+=code;
-  _code+="vec2 mainSound(float time)"
-         "{"
-         "return vec2(cos(6.*200.*time));"
-         "}";
+  _code+=code;
   _code+=
     "\nvoid main()"
     "{"
-        "float pos=gl_FragCoord.x + gl_FragCoord.y*32.0;"
+        "int x=int(gl_FragCoord.x+.5);"
+        "int y=int(gl_FragCoord.y+.5);"
+        "int ipos=x*+(32-y)*32;"
+        //"float pos=float(ipos);"
+        "float pos=gl_FragCoord.x-.5+(31. - (gl_FragCoord.y-.5))*32.;"
         "if (pos <= signal_size)"
         "{"
-          "float t = track_time + (pos/signal_frequency);"
+          //"float t = track_time + (pos/signal_frequency);"
+          "float t = ((float(frame)*signal_size+pos)/signal_frequency);"
 
           "vec2 y = mainSound( t );"
 
@@ -331,7 +337,7 @@ bool AglDecoder::_parseShaderToyCode(const std::string& code)
           "vec2 vh = floor(v/256.0)/255.0;"
           "gl_FragColor = vec4(vl.x,vh.x,vl.y,vh.y);"
         "}"
-        "else { gl_FragColor = vec4(.0,.0,.0,.0); }"
+        "else { gl_FragColor = vec4(.5); }"
     "}\n";
 
   bool r=_createShader();
