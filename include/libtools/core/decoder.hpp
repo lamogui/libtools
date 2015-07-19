@@ -116,6 +116,7 @@ class LIBTOOLS_PRIVATE MusicDecoders : public MusicDecoder
     MusicDecoders();
     virtual ~MusicDecoders();
 
+    bool openWithDecoder(const string_t& filename, MusicDecoder& decoder);
     virtual unsigned int fetch(Signal& outleft, Signal& outright);
 
     virtual bool ended() const;

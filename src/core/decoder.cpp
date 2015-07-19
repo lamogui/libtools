@@ -279,6 +279,21 @@ double MusicDecoders::length() const
 }
 
 
+bool MusicDecoders::openWithDecoder(const string_t& filename, MusicDecoder& decoder)
+{
+  if (decoder.open(filename))
+  {
+    if (&decoder != _currentDecoder)
+    {
+      reset();
+      _currentDecoder=&decoder;
+    }
+    _transmitInfos();
+    return true;
+  }
+  return false;
+}
+
 bool MusicDecoders::_open(const string_t& filename)
 {
 
