@@ -59,8 +59,8 @@ std::string GLSLRender::getVertexShaderCode() {
   return coords_vs_src;
 }
 
-
-bool GLSLRender::loadFromFile(const std::string& fragment_file)
+ #include <iostream>
+bool GLSLRender::shortcutLoadFSFromFile(const std::string& fragment_file)
 {
   FILE* f=fopen(fragment_file.c_str(),"r");
   if (f)
@@ -72,6 +72,7 @@ bool GLSLRender::loadFromFile(const std::string& fragment_file)
     memset((void*)buffer,0,size+5);
     fread((void*)buffer,1,size,f);
     fclose(f);
+    //std::cout << "file:\n" << buffer << std::endl;
     bool success=loadFromMemory(GLSLRender::getVertexShaderCode(),buffer);
     free(buffer);
     return success;

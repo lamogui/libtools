@@ -36,13 +36,13 @@ extern "C" {
 #endif 
 
 const char* vls_fft_fs_src=
-"varying vec2 v;"
+"varying vec2 coords;"
 "uniform float basslimit;"
 "uniform sampler1D spectrum;"
 "uniform bool yflip;"
 "void main()"
 "{"
-  "vec2 mv=v;"  // ->  [0 1]
+  "vec2 mv=coords;"  // ->  [0 1]
   "if (yflip) mv.y=1.0-mv.y;"
   "const float p=4.;"
   "float coord = pow(mv.x*0.5  + 0.18,p);" // mv.x*0.19 -> 22100 Hz to 4200Hz
@@ -59,7 +59,7 @@ const char* vls_fft_fs_src=
 "}";
 
 const char* vls_log_fft_fs_src=
-"varying vec2 v;"
+"varying vec2 coords;"
 "uniform float basslimit;"
 "uniform sampler1D spectrum;"
 "uniform bool yflip;"
@@ -67,7 +67,7 @@ const char* vls_log_fft_fs_src=
 "{"
   "const float eps=1./512.;"
   "const float p=4;"
-  "vec2 mv=v;"  // ->  [0 1]
+  "vec2 mv=coords;"  // ->  [0 1]
   "if (yflip) mv.y=1.0-mv.y;"
   "float coord = pow(mv.x, p);"//(exp(mv.x)-1.)/1.72;"
   "float coorda = pow(mv.x-eps,p);"
@@ -86,7 +86,7 @@ const char* vls_log_fft_fs_src=
 "}";
 
 const char* shadertoy_fft_fs_src=
-"varying vec2 v;"
+"varying vec2 coords;"
 "uniform sampler1D spectrum;"
 "uniform bool yflip;"
 "uniform float bars;"      //32.0   // How many buckets to divide spectrum into
@@ -115,7 +115,7 @@ const char* shadertoy_fft_fs_src=
 "}"
 
 "void main() {"
-  "vec2 uv=v;"
+  "vec2 uv=coords;"
   "if (yflip) uv.y=1.-uv.y;"
   // Get the starting x for this bar by rounding down
   "float barStart = floor(uv.x * bars) / bars;"
