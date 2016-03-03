@@ -41,7 +41,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 extern "C" {
 #endif
 
-LIBTOOLS_PRIVATE unsigned int fsize(FILE *fp);
+LIBTOOLS_PRIVATE uint64_t fsize(FILE *fp);
 
 #ifdef __cplusplus
 }

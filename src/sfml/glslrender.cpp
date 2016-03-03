@@ -62,14 +62,14 @@ std::string GLSLRender::getVertexShaderCode() {
  #include <iostream>
 bool GLSLRender::shortcutLoadFSFromFile(const std::string& fragment_file)
 {
-  FILE* f=fopen(fragment_file.c_str(),"r");
+  FILE* f=fopen(fragment_file.c_str(),"rb");
   if (f)
   {
     fseek(f,0,SEEK_END);
-    unsigned int size=ftell(f);
+    uint64_t size=ftell(f);
     fseek(f,0,SEEK_SET);
-    char* buffer=(char*)malloc(size+5);
-    memset((void*)buffer,0,size+5);
+    char* buffer=(char*)malloc(size+1);
+    memset((void*)buffer,0,size+1);
     fread((void*)buffer,1,size,f);
     fclose(f);
     //std::cout << "file:\n" << buffer << std::endl;

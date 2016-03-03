@@ -37,9 +37,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 extern "C" {
 #endif
 
-unsigned int fsize(FILE *fp){
+uint64_t fsize(FILE *fp){
     unsigned int sz;
-    unsigned int prev=ftell(fp);
+    uint64_t prev=ftell(fp);
     fseek(fp, 0L, SEEK_END);
     sz=ftell(fp);
     fseek(fp,prev,SEEK_SET); //go back to where we were
