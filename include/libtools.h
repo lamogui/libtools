@@ -1,4 +1,4 @@
-
+ï»¿
 /*
 
 THIS FILE IS SUBJECT TO STRICT RULES OF BDE NE777 COPYDOWN. 
@@ -20,7 +20,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   * THIS FILE IS PART OF LIBTOOLS 
   * SECURITY LEVEL : 8 (CRITICAL)  
   * VISIBILITY     : PROTECTED
-  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
+  * Â© COPYDOWNâ„¢ LAMOGUI ALL RIGHTS RESERVED 
   *
   * FILE         : libtools.h
   * AUTHOR       : Julien De Loor (julien.deloor@gmail.com)
@@ -66,6 +66,8 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/core/peak.hpp>
 #include <libtools/core/tempo.hpp>
 #include <libtools/core/music.hpp>
+#include <libtools/core/ncprecomputer.hpp>
+#include <libtools/core/ncmusicstate.hpp>
 
 
 //decoders (may use external lib)
@@ -82,6 +84,7 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
   #include <libtools/drivers/bass.hpp>
 #endif
 #include <libtools/drivers/4klang.hpp>
+#include <libtools/drivers/ffmpegencoder.hpp> 
 
 ///the following are specifics tools to use with a framework
 //sfml (graphical tools) not available on public dll
@@ -92,6 +95,9 @@ AND REMUMERATIONS, FIXED BY ORIGINAL AUTHORS (CONTACT THEM).
 #include <libtools/sfml/window.hpp>
 #include <libtools/sfml/debug.hpp>
 #include <libtools/sfml/scope.hpp>
+#include <libtools/sfml/ncvisualcurves.hpp>
+#include <libtools/sfml/ncwordart.hpp>
+
 #endif
 
 #if defined(QT_VERSION)

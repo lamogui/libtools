@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 
     This file is part of libtools.
 
@@ -21,7 +21,7 @@
   * THIS FILE IS PART OF LIBTOOLS 
   * SECURITY LEVEL : 8 (CRITICAL)  
   * VISIBILITY     : PUBLIC
-  * © COPYDOWN™ LAMOGUI ALL RIGHTS RESERVED 
+  * Â© COPYDOWN LAMOGUI ALL RIGHTS RESERVED
   *
   * FILE         : config.h
   * AUTHOR       : Julien De Loor (julien.deloor@gmail.com)
@@ -106,10 +106,11 @@
 ///C++ API
 
 #ifdef BUILD_LIBTOOLS_SFML
-#include <sfml/system.hpp>
-#include <sfml/window.hpp>
-#include <sfml/graphics.hpp>
-#include <sfml/audio.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include <SFML/Network.hpp>
 #endif
 
 

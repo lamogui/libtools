@@ -1,0 +1,12 @@
+[submodule "submodules/required/rtaudio"]
+	path = submodules/required/rtaudio
+	url = https://github.com/thestk/rtaudio
+[submodule "submodules/optional/SFML"]
+	path = submodules/optional/SFML
+	url = https://github.com/lamogui/SFML
+[submodule "submodules/required/libogg"]
+	path = submodules/required/libogg
+	url = https://git.xiph.org/ogg.git
+[submodule "submodules/required/libvorbis"]
+	path = submodules/required/libvorbis
+	url = https://git.xiph.org/vorbis.git

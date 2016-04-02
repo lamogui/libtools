@@ -6,8 +6,8 @@
 *.lib
 
 build/
-build_gcc/
-build_vs11/
+build_*/
+
 
 *.swp
 *.user
